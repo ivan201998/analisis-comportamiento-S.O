@@ -1,0 +1,20 @@
+{
+  "name": "analisis-comportamiento-s.o",
+  "version": "1.0.0",
+  "description": "Proyecto correspondiente a la **Actividad de Evaluación 2 (AE2)**.",
+  "main": "index.js",
+ "scripts": {
+    "test": "vitest run",
+    "check": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  }
+}
