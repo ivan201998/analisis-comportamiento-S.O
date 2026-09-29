@@ -33,13 +33,7 @@ Para ejecutar el proyecto es necesario tener instalado:
 Clonar el repositorio:
 
 ```bash
-git clone URL-DEL-REPOSITORIO
-```
-
-Ingresar a la carpeta del proyecto:
-
-```bash
-cd NOMBRE-DEL-PROYECTO
+git clone https://github.com/ivan201998/analisis-comportamiento-S.O
 ```
 
 Instalar las dependencias:
