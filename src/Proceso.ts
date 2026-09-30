@@ -23,7 +23,41 @@ export class Proceso {
         this.tiempoTotal = tiempoCpu;
         this.tiempoRestante = tiempoCpu;
         this.quantumConsumido = 0;
-        this.estado = Estado.NUEVO;
-        
+        this.estado = Estado.NUEVO;// RF03: todo proceso nace en estado NUEVO
+
     }
+    //
+    protected getTiempoTotal(): number {
+        return this.tiempoTotal;
+    }
+
+    protected setTiempoTotal(valor: number): void {
+        this.tiempoTotal = valor;
+    }
+
+    //
+    protected getEstado(): Estado{
+        return this.estado;
+    }
+
+    protected setEstado(valor: Estado): void{
+        this.estado = valor;
+    }
+
+    protected getTiempoRestante(): number {
+        return this.tiempoRestante;
+    }
+     
+    protected setTiempoRestante(valor: number): void {
+        this.tiempoRestante = valor;
+    }
+
+    protected getQuantumConsumido(): number{
+        return this.quantumConsumido;
+    }
+
+    protected setQuantumConsumido(valor: number): void{
+        this.quantumConsumido = valor;
+    }
+
 }
