@@ -29,4 +29,24 @@ describe("Proceso de CPU", ()=>{
         proceso.ejecutarTick();
         expect(proceso.agotoQuantum(2)).toBe(true);
     })
+
+    it("reiniciar el quantum vuelve a dejarlo sin consumir", ()=>{
+        const proceso = new Proceso("P1", 200, 5);
+
+        proceso.ejecutarTick();
+        proceso.ejecutarTick();
+        proceso.reiniciarQuantum();
+
+        expect(proceso.agotoQuantum(2)).toBe(false);
+    })
+
+    it("un proceso solo CPU no admite E/S ni se bloquea", ()=>{
+        const proceso = new Proceso("P1", 200, 5);
+
+        proceso.bloquear(3);
+
+        expect(proceso.admiteES()).toBe(false);
+        expect(proceso.estaBloqueado()).toBe(false);
+        
+    })
 })

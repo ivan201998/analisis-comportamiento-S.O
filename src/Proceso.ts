@@ -67,14 +67,33 @@ export class Proceso {
         this.setQuantumConsumido(this.getQuantumConsumido() + 1);
 
     }
-
+    //
     estaTerminado(): boolean{
         return this.getTiempoRestante () <= 0;
     }
-
+    //
     agotoQuantum(limite: number): boolean{
 
         return this.getQuantumConsumido() >= limite;//aclarar porque no poner un get aca
 
     }
+    //
+    reiniciarQuantum(): void {
+
+        this.setQuantumConsumido(0);
+
+    }
+    //
+    bloquear(ticks: number): void{
+
+    }
+    //
+    admiteES(): boolean{
+        return false;
+    }
+    //
+    estaBloqueado(): boolean{
+        return false;
+    }
+
 }
