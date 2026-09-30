@@ -24,9 +24,9 @@ describe("Proceso de CPU", ()=>{
         const proceso = new Proceso("P1", 200, 5);
 
         proceso.ejecutarTick();
-        expect(proceso.agotoQuantum()).toBe(false);
+        expect(proceso.agotoQuantum(2)).toBe(false);
 
         proceso.ejecutarTick();
-        expect(proceso.agotoQuantum()).toBe(true);
+        expect(proceso.agotoQuantum(2)).toBe(true);
     })
 })

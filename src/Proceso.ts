@@ -43,7 +43,7 @@ export class Proceso {
     protected setEstado(valor: Estado): void{
         this.estado = valor;
     }
-
+    //
     protected getTiempoRestante(): number {
         return this.tiempoRestante;
     }
@@ -51,7 +51,7 @@ export class Proceso {
     protected setTiempoRestante(valor: number): void {
         this.tiempoRestante = valor;
     }
-
+    //
     protected getQuantumConsumido(): number{
         return this.quantumConsumido;
     }
@@ -60,4 +60,21 @@ export class Proceso {
         this.quantumConsumido = valor;
     }
 
+    //
+    ejecutarTick(): void {
+
+        this.setTiempoRestante(this.getTiempoRestante() - 1);
+        this.setQuantumConsumido(this.getQuantumConsumido() + 1);
+
+    }
+
+    estaTerminado(): boolean{
+        return this.getTiempoRestante () <= 0;
+    }
+
+    agotoQuantum(limite: number): boolean{
+
+        return this.getQuantumConsumido() >= limite;//aclarar porque no poner un get aca
+
+    }
 }
