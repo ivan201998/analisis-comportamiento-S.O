@@ -73,5 +73,35 @@ export class ColasProcesos implements Colas {
 
     }
 
-    
+     bloquear(proceso: Proceso): void {
+
+        proceso.cambiarEstado(Estado.BLOQUEADO);
+        this.bloqueados.push(proceso);
+
+    }
+
+    terminar(proceso: Proceso): void {
+
+        proceso.cambiarEstado(Estado.TERMINADO);
+        this.terminados.push(proceso);
+
+    }
+
+    pidsListos(): string[] {
+
+        return this.listos.map(proceso => proceso.pid);
+
+    }
+
+     pidsEsperandoMemoria(): string[] {
+
+        return this.esperaMemoria.map(proceso => proceso.pid);
+
+    }
+
+    pidsTerminados(): string[] {
+
+        return this.terminados.map(proceso => proceso.pid);
+
+    }
 }
