@@ -11,7 +11,7 @@ export class ColasProcesos implements Colas {
 
     private nuevos: Proceso [] = [];
     private esperaMemoria: Proceso[] = [];
-    private listo: Proceso[] = [];
+    private listos: Proceso[] = [];
     private bloqueados: Proceso[] = [];
     private terminados: Proceso[] = [];
 
@@ -40,7 +40,37 @@ export class ColasProcesos implements Colas {
 
         ubicados.forEach(proceso => proceso.cambiarEstado(Estado.LISTO));
 
-        this.listo.push(...ubicados);
+        this.listos.push(...ubicados);
+    }
+
+    vanzarBloqueados(): void{
+        this.bloqueados.forEach(proceso => proceso.avanzarBloqueo());
+
+        const despiertos = this.bloqueados.filter(proceso => !proceso.estaBloqueado());
+
+        this.bloqueados = this.bloqueados.filter(proceso => proceso.estaBloqueado());
+        despiertos.forEach(proceso => proceso.cambiarEstado(Estado.LISTO));
+        this.listos.push(...despiertos);
+
+    }
+
+    hayListos(): boolean {
+
+        return this.listos.length > 0;
+
+    }
+
+    tomarListo(): Proceso | undefined {
+
+        return this.listos.shift();
+
+    }
+
+    reencolar(proceso: Proceso): void {
+
+        proceso.cambiarEstado(Estado.LISTO);
+        this.listos.push(proceso);
+
     }
 
     
