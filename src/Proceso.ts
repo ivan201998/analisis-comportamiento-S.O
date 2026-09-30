@@ -126,6 +126,28 @@ export class Proceso implements ComportamientoProceso {
         this.setQuantumConsumido(0);
 
     }
+    //
+    // POLIMORFISMO: estos 4 metodos son el "comportamiento por defecto" (un proceso comun
+    // no hace E/S). ProcesoConES los sobrescribe con override (ver ProcesoConES.ts). Quien
+    // los llama (SimuladorSO) no pregunta que tipo de proceso es, solo invoca el metodo.
+    admiteES(): boolean {
 
+        return false;
+
+    }
+    //
+    bloquear(ticks: number): void {
+
+    }
+    //
+    avanzarBloqueo(): void {
+
+    }
+    //
+    estaBloqueado(): boolean {
+
+        return false;
+
+    }
 
 }

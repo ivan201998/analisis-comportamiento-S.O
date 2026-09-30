@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-//import { ColasProcesos } from '../src/ColasProcesos';
+import { ColasProcesos } from '../src/ColasProcesos';
 import { Estado, Proceso } from '../src/Proceso';
-//import { ProcesoConES } from '../src/ProcesoConES';
+import { ProcesoConES } from '../src/ProcesoConES';
 
 describe ("Colas Procesos", ()=>{
     it("un proceso recien agregado queda en NUEVO",()=>{
@@ -47,7 +47,7 @@ describe ("Colas Procesos", ()=>{
 
         expect(p.estaEn(Estado.ESPERANDO_MEMORIA)).toBe(true);
         expect(colas.pidsEsperandoMemoria()).toEqual(["P1"]);
-        
+
     })
 
     it("",()=>{
