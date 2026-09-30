@@ -81,6 +81,51 @@ export class Proceso implements ComportamientoProceso {
     cambiarEstado(nuevo: Estado): void{
         this.setEstado(nuevo);
     }
+    //
+    estaEn(estado: Estado): boolean {
 
-    
+        return this.getEstado() === estado;
+
+    }
+    //
+    describirEstado(): string {
+
+        return this.getEstado();
+
+    }
+    //
+    // Usa el tiempo total (que no cambia) y el restante (que baja en cada tick).
+    porcentajeCompletado(): number {
+
+        return ((this.getTiempoTotal() - this.getTiempoRestante()) / this.mayorEntre(this.getTiempoTotal(), 1)) * 100;
+
+    }
+    //
+    // Reemplaza a Math.max: si a es mayor, se queda con a; si no, con b.
+    // Protegido para que ProcesoConES tambien lo pueda usar.
+    protected mayorEntre(a: number, b: number): number {
+
+        return a > b ? a : b;
+
+    }
+    //
+    estaTerminado(): boolean {
+
+        return this.getTiempoRestante() <= 0;
+
+    }
+    //
+    agotoQuantum(limite: number): boolean {
+
+        return this.getQuantumConsumido() >= limite;
+
+    }
+    //
+    reiniciarQuantum(): void {
+
+        this.setQuantumConsumido(0);
+
+    }
+
+
 }

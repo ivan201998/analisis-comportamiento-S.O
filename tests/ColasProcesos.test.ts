@@ -18,8 +18,39 @@ describe ("Colas Procesos", ()=>{
         const p = new Proceso("P1", 100, 1);
         colas.agregarNuevo(p);
 
+        colas.ingresarNuevos();
+        
         expect(p.estaEn(Estado.ESPERANDO_MEMORIA)).toBe(true);
         expect(colas.pidsEsperandoMemoria()).toEqual(["P1"]);
     })
 
+    it("reintentarMemoria solo mueve a listos los que consiguen asignarse",()=>{
+        const colas = new colasProcesos();
+        const p1 = new Proceso("P1", 100, 1);
+        const p2 = new Proceso("P2", 100, 1);
+
+        colas.agregarNuevo(p1);
+        colas.agregarNuevo(p2);
+        colas.agregarNuevo();
+
+         colas.reintentarMemoria(proceso => proceso.pid === "P1");
+
+        expect(colas.pidsListos()).toEqual(["P1"]);
+        expect(colas.pidsEsperandoMemoria()).toEqual(["P2"]);
+    })
+
+    it("reencolar deja al proceso LISTO al final de la fila",()=>{
+        const colas = new colasProcesos();
+        const p = new Proceso("P1", 100, 1);
+
+        colas.reencolar(p);
+
+        expect(p.estaEn(Estado.ESPERANDO_MEMORIA)).toBe(true);
+        expect(colas.pidsEsperandoMemoria()).toEqual(["P1"]);
+        
+    })
+
+    it("",()=>{
+        
+    })
 })
