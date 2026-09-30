@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Proceso } from '../src/Proceso';
+import { ProcesoConES } from '../src/ProcesoConES';
 
 describe("Proceso de CPU", ()=>{
     it("un proceso de 1 tick de CPU termina despues de ejecutar 1 tick", ()=>{
@@ -47,6 +48,25 @@ describe("Proceso de CPU", ()=>{
 
         expect(proceso.admiteES()).toBe(false);
         expect(proceso.estaBloqueado()).toBe(false);
-        
+
+    })
+
+    describe("Proceso con E/S", ()=>{
+        it("admite E/S",()=>{
+            expect(new ProcesoConES("P1", 100, 5).admiteES()).toBe(true);
+        })
+
+        it("no esta bloqueado al crearse",()=>{
+            expect(new ProcesoConES("P1", 100, 5).estaBloqueado()).toBe(false);
+        })
+
+        it("queda bloqueado despues de bloquear",()=>{
+            const proceso = new ProcesoConES("P1", 100, 5);
+
+            proceso.bloquear(2);
+
+            expect(proceso.estaBloqueado()).toBe(true);
+        })
+
     })
 })
