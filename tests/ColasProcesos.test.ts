@@ -14,7 +14,7 @@ describe ("Colas Procesos", ()=>{
     })
 
     it("ingresarNuevos pasa a ESPERANDO_MEMORIA y vacia la cola de nuevos",()=>{
-        const colas = new colasProcesos();
+        const colas = new ColasProcesos();
         const p = new Proceso("P1", 100, 1);
         colas.agregarNuevo(p);
 
@@ -25,7 +25,7 @@ describe ("Colas Procesos", ()=>{
     })
 
     it("reintentarMemoria solo mueve a listos los que consiguen asignarse",()=>{
-        const colas = new colasProcesos();
+        const colas = new ColasProcesos();
         const p1 = new Proceso("P1", 100, 1);
         const p2 = new Proceso("P2", 100, 1);
 
@@ -40,7 +40,7 @@ describe ("Colas Procesos", ()=>{
     })
 
     it("reencolar deja al proceso LISTO al final de la fila",()=>{
-        const colas = new colasProcesos();
+        const colas = new ColasProcesos();
         const p = new Proceso("P1", 100, 1);
 
         colas.reencolar(p);
