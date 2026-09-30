@@ -73,15 +73,34 @@ describe ("Colas Procesos", ()=>{
         expect(colas.pidsListos()).toEqual(["P1"]);
     })
 
-    it("",()=>{
-        
+    it("avanzarBloqueados deja esperando al que todavia no cumplio su E/S",()=>{
+        const colas = new ColasProcesos();
+        const p = new ProcesoConES("P1", 100, 5);
+        p.bloquear(2);
+        colas.bloquear(p);
+
+        colas.avanzarBloqueados();
+
+        expect(p.estaEn(Estado.BLOQUEADO)).toBe(true);
+        expect(colas.pidsListos()).toEqual([]);
     })
 
-    it("",()=>{
-        
+    it("terminar mueve al proceso a terminados y lo deja en TERMINADO",()=>{
+        const colas = new ColasProcesos();
+        const p = new Proceso("P1", 100, 1);
+
+        colas.terminar(p);
+
+        expect(p.estaEn(Estado.TERMINADO)).toBe(true);
+        expect(colas.pidsTerminados()).toEqual(["P1"]);
     })
 
-    it("",()=>{
-        
+    it("hayListos refleja si la cola de listos tiene elementos",()=>{
+        const colas = new ColasProcesos();
+        expect(colas.hayListos()).toBe(false);
+
+        colas.reencolar(new Proceso("P1", 100, 1));
+
+        expect(colas.hayListos()).toBe(true);
     })
 })
