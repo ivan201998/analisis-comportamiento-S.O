@@ -50,6 +50,37 @@ describe ("Colas Procesos", ()=>{
 
     })
 
+    it("bloquear deja al proceso BLOQUEADO",()=>{
+
+        const colas = new ColasProcesos();
+        const p = new Proceso("P1", 100, 1);
+
+        colas.bloquear(p);
+
+        expect(p.estaEn(Estado.BLOQUEADO)).toBe(true);
+    })
+
+    it("avanzarBloqueados pasa a listos a los que ya cumplieron su E/S",()=>{
+
+        const colas = new ColasProcesos();
+        const p = new ProcesoConES("P1", 100, 5);
+        p.bloquear(1);
+        colas.bloquear(p);
+
+        colas.avanzarBloqueados();
+
+        expect(p.estaEn(Estado.LISTO)).toBe(true);
+        expect(colas.pidsListos()).toEqual(["P1"]);
+    })
+
+    it("",()=>{
+        
+    })
+
+    it("",()=>{
+        
+    })
+
     it("",()=>{
         
     })
