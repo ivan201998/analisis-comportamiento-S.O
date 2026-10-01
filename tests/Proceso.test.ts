@@ -82,6 +82,26 @@ describe ("Proceso con E/S", ()=>{
         expect(proceso.estaBloqueado()).toBe(true);
     });
 
-    
+    it("se desbloquea cuando avanzan tantos ticks como pidio", () => {
+        const proceso = new ProcesoConES("P1", 100, 5);
+        proceso.bloquear(2);
+
+        proceso.avanzarBloqueo();
+        expect(proceso.estaBloqueado()).toBe(true);
+
+        proceso.avanzarBloqueo();
+        expect(proceso.estaBloqueado()).toBe(false);
+    });
+
+    it("avanzar el bloqueo de un proceso libre no lo deja en negativo", () => {
+        const proceso = new ProcesoConES("P1", 100, 5);
+
+        proceso.avanzarBloqueo();
+        proceso.bloquear(1);
+
+        expect(proceso.estaBloqueado()).toBe(true);
+    });
 })
+
+
 })
