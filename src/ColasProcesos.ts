@@ -93,7 +93,7 @@ export class ColasProcesos implements Colas {
 
     }
 
-     pidsEsperandoMemoria(): string[] {
+    pidsEsperandoMemoria(): string[] {
 
         return this.esperaMemoria.map(proceso => proceso.pid);
 
