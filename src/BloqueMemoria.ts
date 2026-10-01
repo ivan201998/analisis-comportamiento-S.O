@@ -46,7 +46,23 @@ export class BloqueoMemoria implements IBloque{
         return this.getOcupante() === pid;
     }
 
-     esVacio(): boolean {
+    esVacio(): boolean {
         return this.getTamano() === 0;
-     }    
+    }
+
+    entra(proceso: Proceso): boolean {
+        return this.estaLibre() && this.getTamano() >= proceso.tamanoMemoria;
+    }
+
+    capacidad(): number {
+
+    }
+    
+    kbLibres(): number{
+
+    }
+
+    kbOcupados(): number{
+        
+    }
 }
