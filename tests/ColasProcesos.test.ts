@@ -45,8 +45,8 @@ describe ("Colas Procesos", ()=>{
 
         colas.reencolar(p);
 
-        expect(p.estaEn(Estado.ESPERANDO_MEMORIA)).toBe(true);
-        expect(colas.pidsEsperandoMemoria()).toEqual(["P1"]);
+        expect(p.estaEn(Estado.LISTO)).toBe(true);
+        expect(colas.pidsListos()).toEqual(["P1"]);
 
     })
 
@@ -67,7 +67,7 @@ describe ("Colas Procesos", ()=>{
         p.bloquear(1);
         colas.bloquear(p);
 
-        colas.vanzarBloqueados();
+        colas.avanzarBloqueados();
 
         expect(p.estaEn(Estado.LISTO)).toBe(true);
         expect(colas.pidsListos()).toEqual(["P1"]);
@@ -79,7 +79,7 @@ describe ("Colas Procesos", ()=>{
         p.bloquear(2);
         colas.bloquear(p);
 
-        colas.vanzarBloqueados();
+        colas.avanzarBloqueados();
 
         expect(p.estaEn(Estado.BLOQUEADO)).toBe(true);
         expect(colas.pidsListos()).toEqual([]);

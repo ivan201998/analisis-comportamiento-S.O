@@ -18,6 +18,12 @@ export class ProcesoConES extends Proceso implements ComportamientoProceso{
 
     }
 
+    protected setTiempoBloqueo(valor: number): void {
+
+        this.tiempoBloqueo = valor;
+
+    }
+
     // POLIMORFISMO: estos 4 metodos sobrescriben (override) el comportamiento por defecto
     // de Proceso. SimuladorSO los llama igual que a los de un Proceso comun, sin saber
     // que esta hablando con un ProcesoConES.

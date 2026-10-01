@@ -43,7 +43,7 @@ export class ColasProcesos implements Colas {
         this.listos.push(...ubicados);
     }
 
-    vanzarBloqueados(): void{
+    avanzarBloqueados(): void{
         this.bloqueados.forEach(proceso => proceso.avanzarBloqueo());
 
         const despiertos = this.bloqueados.filter(proceso => !proceso.estaBloqueado());
