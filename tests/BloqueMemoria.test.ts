@@ -20,18 +20,37 @@ describe("BloqueMemoria", ()=>{
     })
 
     it("ocupado deja de estar libre y ya no acepta procesos", ()=>{
+        const bloque = new BloqueMemoria(0, 100);
+        bloque.ocuparCon(new Proceso("P1", 40, 1));
 
+        expect(bloque.estaLibre()).toBe(false);
+        expect(bloque.entra(new Proceso("P2", 10, 1))).toBe(false);
     })
 
     it("recuerda que proceso lo ocupa", ()=>{
-        
+        const bloque = new BloqueMemoria(0, 100);
+        bloque.ocuparCon(new Proceso("P1", 40, 1));
+
+        expect(bloque.esDe("P1")).toBe(true);
+        expect(bloque.esDe("P2")).toBe(false);
     })
 
     it("al ocuparse con un proceso mas chico se parte y devuelve el sobrante libre", ()=>{
-        
+        const bloque = new BloqueMemoria(0, 100);
+
+        const sobrante = bloque.ocuparCon(new Proceso("P1", 40, 1));
+
+        expect(bloque.capacidad()).toBe(40);
+        expect(sobrante).toHaveLength(1);
+        expect(sobrante[0].describir()).toBe("[40-100 KB] LIBRE");
     })
 
     it("si el proceso ocupa todo el bloque no queda sobrante", ()=>{
-        
+        const bloque = new BloqueMemoria(0, 100);
+
+        const sobrante = bloque.ocuparCon(new Proceso("P1", 100, 1));
+
+        expect(sobrante).toHaveLength(0);
+        expect(bloque.capacidad()).toBe(100);
     })
 })

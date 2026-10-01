@@ -37,4 +37,16 @@ export class BloqueoMemoria implements IBloque{
     protected setOcupante(pid: string | undefined): void {
         this.ocupante = pid;
     }
+
+    estaLibre(): boolean {
+        return this.getOcupante() === undefined;
+    }
+
+    esDe(pid: string): boolean {
+        return this.getOcupante() === pid;
+    }
+
+     esVacio(): boolean {
+        return this.getTamano() === 0;
+     }    
 }
