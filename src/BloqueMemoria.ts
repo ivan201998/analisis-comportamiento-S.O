@@ -55,14 +55,35 @@ export class BloqueoMemoria implements IBloque{
     }
 
     capacidad(): number {
-
+        return this.getTamano();
     }
     
     kbLibres(): number{
-
+        return this.getTamano() * Number(this.estaLibre());
     }
 
     kbOcupados(): number{
+        return this.capacidad() - this.kbLibres();
+    }
+
+    // Se achica al tamano del proceso y devuelve el sobrante como bloque libre (lista de 0 o 1).
+    ocuparCon(proceso: Proceso): BloqueMemoria[] {
+
+    }
+
+    liberar(): void {
+
+    }
+
+    puedeFusionarCon(otro: BloqueMemoria): boolean {
+
+    }
+
+    fusionarCon(otro: BloqueMemoria): void {
+
+    }
+
+    describir(): string {
         
     }
 }

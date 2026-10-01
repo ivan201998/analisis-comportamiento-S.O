@@ -53,4 +53,24 @@ describe("BloqueMemoria", ()=>{
         expect(sobrante).toHaveLength(0);
         expect(bloque.capacidad()).toBe(100);
     })
+
+    it("liberar lo deja libre otra vez", ()=>{
+
+    })
+
+    it("cuenta sus KB como libres u ocupados segun su estado", ()=>{
+        
+    })
+
+    it("dos bloques libres pueden fusionarse y suman su tamano", ()=>{
+        
+    })
+
+    it("un bloque ocupado no puede fusionarse", ()=>{
+        
+    })
+
+    it("se describe con su rango y su ocupante", ()=>{
+        
+    })
 })
