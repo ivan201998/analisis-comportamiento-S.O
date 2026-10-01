@@ -1,6 +1,6 @@
-import { ComportamientoProceso } from './ComportamientoProceso';
+import { ComportamientoProceso } from './IComportamientoProceso';
 
-// Bloque de Control de Proceso (PCB).
+// Bloque de Control de Proceso (PCB). Equivale a UnidadCombate: guarda el estado privado
 // con get/set protegidos; ProcesoConES (hija) cambia el comportamiento como Soldado con su escudo.
 // HERENCIA / LISKOV: esta clase es la base de ProcesoConES (ver ProcesoConES.ts). Cualquier
 // lugar que reciba un Proceso funciona igual si en realidad le pasan un ProcesoConES.
@@ -21,7 +21,6 @@ export class Proceso implements ComportamientoProceso {
     // ENCAPSULAMIENTO: estos 4 campos son privados. Nadie de afuera los lee ni los escribe
     // directo; solo se llega a ellos por los get/set protegidos de mas abajo, o por los
     // metodos publicos (ejecutarTick, cambiarEstado, etc.) que respetan las reglas del dominio.
-
     private tiempoTotal: number;
     private tiempoRestante: number;
     private quantumConsumido: number;
@@ -29,7 +28,8 @@ export class Proceso implements ComportamientoProceso {
 
     // pid y tamanoMemoria son la identidad del proceso: no deben poder reasignarse desde afuera
     // (RF02 / doble encapsulamiento). readonly evita esa mutacion externa.
-    constructor (readonly pid: string, readonly tamanoMemoria: number, tiempoCpu: number){
+    constructor(readonly pid: string, readonly tamanoMemoria: number, tiempoCpu: number) {
+
         this.tiempoTotal = tiempoCpu;
         this.tiempoRestante = tiempoCpu;
         this.quantumConsumido = 0;
@@ -37,10 +37,12 @@ export class Proceso implements ComportamientoProceso {
 
     }
     //
-    protected getTiempoTotal(): number {//se usa protected o provate
-        return this.tiempoTotal;
-    }
+   protected getTiempoTotal(): number {
 
+        return this.tiempoTotal;
+
+    }
+    //
     protected setTiempoTotal(valor: number): void {
         this.tiempoTotal = valor;
     }

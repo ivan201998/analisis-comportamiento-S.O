@@ -1,11 +1,11 @@
-import { ComportamientoProceso } from './ComportamientoProceso';
+import { ComportamientoProceso } from './IComportamientoProceso';
 import { Proceso } from './Proceso';
 
 // Proceso que ademas puede bloquearse por E/S durante N ticks.
 // HERENCIA (relacion "es un"): un ProcesoConES es un Proceso, con un comportamiento extra.
 // LISKOV: en SimuladorSO, todo lugar que usa un Proceso funciona igual si en realidad
 // recibe un ProcesoConES (por ejemplo, en ejecutarCpu() o avanzarBloqueados()).
-// Ya cumple ComportamientoProceso por herencia (Proceso lo implementa); se vuelve a
+// Ya cumple IComportamientoProceso por herencia (Proceso lo implementa); se vuelve a
 // declarar aca para que quede visible en este archivo tambien.
 
 export class ProcesoConES extends Proceso implements ComportamientoProceso{

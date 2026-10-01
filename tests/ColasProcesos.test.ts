@@ -39,6 +39,15 @@ describe ("Colas Procesos", ()=>{
         expect(colas.pidsEsperandoMemoria()).toEqual(["P2"]);
     })
 
+    it("tomarListo saca al primero en orden FIFO", () => {
+        const colas = new ColasProcesos();
+        colas.reencolar(new Proceso("P1", 100, 1));
+        colas.reencolar(new Proceso("P2", 100, 1));
+
+        expect(colas.tomarListo()?.pid).toBe("P1");
+        expect(colas.pidsListos()).toEqual(["P2"]);
+    });
+
     it("reencolar deja al proceso LISTO al final de la fila",()=>{
         const colas = new ColasProcesos();
         const p = new Proceso("P1", 100, 1);

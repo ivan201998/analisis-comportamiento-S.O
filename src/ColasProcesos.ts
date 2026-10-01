@@ -1,4 +1,4 @@
-import { Colas } from './Colas';
+import { Colas } from './IColas';
 import { Estado, Proceso } from './Proceso';
 
 // Las 3 salas de espera del proceso (esperando memoria, listos, bloqueados) mas los dos
@@ -73,7 +73,7 @@ export class ColasProcesos implements Colas {
 
     }
 
-     bloquear(proceso: Proceso): void {
+    bloquear(proceso: Proceso): void {
 
         proceso.cambiarEstado(Estado.BLOQUEADO);
         this.bloqueados.push(proceso);
