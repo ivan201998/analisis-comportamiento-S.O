@@ -1,7 +1,7 @@
 import { Proceso } from './Proceso';
 
 // Contrato publico de las colas de procesos. ColasProcesos lo implementa.
-export interface Colas {
+export interface IColas {
     agregarNuevo(proceso: Proceso): void;
     ingresarNuevos(): void;
     reintentarMemoria(intentarAsignar: (proceso: Proceso) => boolean): void;

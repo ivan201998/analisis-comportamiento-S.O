@@ -111,26 +111,89 @@ describe("SimuladorSO", ()=>{
     })
 
     it("Round-Robin: al agotar el quantum con otro esperando, rota al final de listos", ()=>{
-        
+        const simulador = new SimuladorSO(2);
+        simulador.agregarProceso(new Proceso("A", 100, 3));
+        simulador.agregarProceso(new Proceso("B", 100, 3));
+
+        avanzar(simulador, 1);
+        expect(simulador.cambiosDeContexto()).toBe(0);
+
+        avanzar(simulador, 1);
+        expect(simulador.cambiosDeContexto()).toBe(1);
+        expect(simulador.pidsListos()).toEqual(["B", "A"]);
     })
 
     it("Round-Robin: un proceso solo renueva su quantum sin cambio de contexto", ()=>{
-        
+        const simulador = new SimuladorSO(2);
+        simulador.agregarProceso(new Proceso("A", 100, 4));
+
+        avanzar(simulador, 3);
+        expect(simulador.pidsTerminados()).toEqual([]);
+
+        avanzar(simulador, 1);
+        expect(simulador.pidsTerminados()).toEqual(["A"]);
+        expect(simulador.cambiosDeContexto()).toBe(0);
     })
 
     it("Round-Robin: el proceso rotado vuelve con el quantum reiniciado", ()=>{
-        
+        const simulador = new SimuladorSO(2);
+        simulador.agregarProceso(new Proceso("A", 100, 4));
+        simulador.agregarProceso(new Proceso("B", 100, 4));
+
+        avanzar(simulador, 5);   // t1-2 A, t3-4 B (rota), t5 A con quantum nuevo: aun no rota
+
+        expect(simulador.cambiosDeContexto()).toBe(2);
     })
 
     it("estados: antes del primer tick todos los procesos estan NUEVOS", ()=>{
-        
+        const simulador = simuladorDeLaConsigna();
+
+        expect(simulador.estados()).toEqual(["P1: NUEVO", "P2: NUEVO", "P3: NUEVO", "P4: NUEVO"]);
     })
 
     it("estados tick 1: P1 ejecuta, P2 y P3 listos, P4 espera memoria", ()=>{
-        
+        const simulador = simuladorDeLaConsigna();
+
+        avanzar(simulador, 1);
+
+        expect(simulador.estados()).toEqual([
+            "P1: EJECUTANDO", "P2: LISTO", "P3: LISTO", "P4: ESPERANDO_MEMORIA",
+        ]);
     })
 
     it("estados tick 2: P1 agota el quantum y vuelve a LISTO, P2 sigue LISTO", ()=>{
+        const simulador = simuladorDeLaConsigna();
+
+        avanzar(simulador, 2);
+
+        expect(simulador.estados()[0]).toBe("P1: LISTO");
+    })
+
+    it("estados tick 6: P3 termina y queda TERMINADO", ()=>{
+
+    })
+
+    it("estados tick 12: todos TERMINADOS", ()=>{
+        
+    })
+
+    it("estados: un proceso con E/S pasa por EJECUTANDO, BLOQUEADO y vuelve a EJECUTANDO", ()=>{
+        
+    })
+
+    it("RF01: rechaza un quantum invalido (cero, negativo o decimal)", ()=>{
+        
+    })
+
+    it("RF02: rechaza un PID duplicado sin registrar el segundo proceso", ()=>{
+        
+    })
+
+    it("RF02: rechaza un proceso que pide mas memoria que el total", ()=>{
+        
+    })
+
+    it("RF10: expone el tick actual y el pid del proceso que esta en la CPU", ()=>{
         
     })
 })

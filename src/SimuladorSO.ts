@@ -42,7 +42,7 @@ export class SimuladorSO implements ISimulador {
     private static enteroPositivo(valor: number, nombre: string): number {
 
         const esValido = Number.isInteger(valor) && valor > 0;
-        return esValido ? valor : SimuladorSO.error(`${nombre} debe ser un entero positivo`);
+        return esValido ? valor : SimuladorSO.error("${nombre} debe ser un entero positivo");
 
 
     }
@@ -69,7 +69,7 @@ export class SimuladorSO implements ISimulador {
         const reglas: Array<[boolean, string]> = [
             [existentes.some(p => p.pid === proceso.pid), `Ya existe un proceso con PID ${proceso.pid}`],
             [proceso.tamanoMemoria > memoriaTotal,
-                `El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)`]
+                "El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)"]
         ];
         const incumplida = reglas.find(([condicion]) => condicion);
 
@@ -126,5 +126,79 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    
+    private finalizarProceso(proceso: Proceso): void {
+
+        this.memoria.liberar(proceso.pid);
+        this.colas.terminar(proceso);
+
+    }
+
+    private rotarProceso(proceso: Proceso): void {
+
+        this.colas.reencolar(proceso);
+        this.estadisticas.registrarCambioDeContexto();
+
+    }
+
+    usoCpu(): number {
+
+        return this.estadisticas.usoCpu();
+
+    }
+
+    cambiosDeContexto(): number {
+
+        return this.estadisticas.cambiosDeContexto();
+
+    }
+
+    // RF10: estado del sistema consultable, sin exponer los objetos internos.
+    tickActual(): number {
+
+        return this.estadisticas.tickActual();
+
+    }
+
+    procesoEnCpu(): string | undefined {
+
+        return this.planificador.procesoEnCpu();
+
+    }
+
+    metricasMemoria(): IMetricas {
+
+        return this.memoria.metricas();
+
+    }
+
+    mapaMemoria(): string[] {
+
+        return this.memoria.mapa();
+
+    }
+
+    // Estado de cada proceso, en el orden en que se agregaron. Ej: "P1: EJECUTANDO".
+    estados(): string[] {
+
+        return this.todos.map(proceso => "${proceso.pid}: ${proceso.describirEstado()}");
+
+    }
+
+    pidsListos(): string[] {
+
+        return this.colas.pidsListos();
+
+    }
+
+    pidsEsperandoMemoria(): string[] {
+
+        return this.colas.pidsEsperandoMemoria();
+
+    }
+
+    pidsTerminados(): string[] {
+
+        return this.colas.pidsTerminados();
+
+    }
 }
