@@ -85,6 +85,46 @@ export class SimuladorSO implements ISimulador {
         const bloqueable = proceso !== undefined && proceso.admiteES();
 
         bloqueable ? this.ejecutarBloqueo(proceso as Proceso, ticks) : undefined;
-        
+
     }
+
+    private ejecutarBloqueo(proceso: Proceso, ticks: number): void {
+        this.planificador.liberarCpu();
+        proceso.reiniciarQuantum();
+        proceso.bloquear(ticks);
+        this.colas.bloquear(proceso);
+        this.estadisticas.registrarCambioDeContexto();
+    }
+
+    // RF06: 1 tick determinista, siempre con el mismo orden de fases.
+    avanzarTick(): void {
+        this.estadisticas.avanzarReloj();
+
+        this.colas.ingresarNuevos();                                    // A: nuevos -> esperando memoria
+        this.colas.reintentarMemoria(proceso => this.memoria.asignar(proceso)); // A: esperando memoria -> listos
+        this.colas.avanzarBloqueados();                                 // B: E/S
+        this.despachar();                                               // C: la CPU toma a alguien si esta libre
+        this.reaccionarAlTick(this.planificador.ejecutarCpu(this.colas.hayListos())); // D: 1 tick de Round-Robin
+    }
+
+    private despachar(): void {
+
+        const candidato = this.planificador.estaLibre() ? this.colas.tomarListo() : undefined;
+
+        candidato ? this.planificador.tomarControl(candidato) : undefined;
+
+    }
+
+    // POLIMORFISMO / LISKOV: el resto de esta clase nunca pregunta si un Proceso es un
+    // ProcesoConES; llama a sus metodos (ejecutarTick, admiteES...) y listo.
+    private reaccionarAlTick(resultado: IResultadoTick): void {
+
+        this.estadisticas.registrarEjecucion(resultado.ocupado);
+
+        resultado.terminado ? this.finalizarProceso(resultado.terminado) : undefined;
+        resultado.rotado ? this.rotarProceso(resultado.rotado) : undefined;
+
+    }
+
+    
 }
