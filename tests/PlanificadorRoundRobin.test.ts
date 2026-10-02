@@ -41,6 +41,23 @@ describe("Planificador RoundRobin", ()=>{
         expect(planificador.estaLibre()).toBe(true);
     })
 
+    it("RF07: la finalizacion tiene prioridad sobre el vencimiento del quantum",()=>{
 
+    })
 
+     it("si se agota el quantum y hay otros listos, rota",()=>{
+        
+    })
+
+     it("si se agota el quantum y no hay otros listos, renueva y sigue sin rotar",()=>{
+        
+    })
+
+     it("liberarCpu deja la CPU libre",()=>{
+        
+    })
+
+     it("procesoActivo devuelve el proceso sin sacarlo de la CPU",()=>{
+        
+    })
 })
