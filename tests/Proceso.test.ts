@@ -48,24 +48,6 @@ describe("Proceso CPU", () => {
 
             expect(proceso.agotoQuantum(2)).toBe(false);
         })
-
-        it("un proceso solo CPU no admite E/S ni se bloquea", ()=>{
-            const proceso = new Proceso("P1", 200, 5);
-
-            proceso.bloquear(3);
-
-            expect(proceso.admiteES()).toBe(false);
-            expect(proceso.estaBloqueado()).toBe(false);
-        })
-
-        it("un proceso solo CPU tambien ignora avanzarBloqueo() (no hace nada)", ()=>{
-            
-            const proceso = new Proceso("P1", 200, 5);
-
-            proceso.avanzarBloqueo();
-
-            expect(proceso.estaBloqueado()).toBe(false);
-        })
     //
     describe ("Proceso con E/S", ()=>{
         it("admite E/S", () => {

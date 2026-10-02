@@ -59,6 +59,30 @@ describe("SimuladorSO", ()=>{
         expect(simulador.mapaMemoria()).toContain("[550-950 KB] P4");
     })
 
+    it("tick 8: P1 termina y quedan dos huecos separados (200 y 74 KB), 27.01% de fragmentacion", () => {
+    const simulador = simuladorDeLaConsigna();
+
+    avanzar(simulador, 8);
+
+    const m = simulador.metricasMemoria();
+    expect(m.ocupada).toBe(750);
+    expect(m.libreTotal).toBe(274);
+    expect(m.mayorHueco).toBe(200);
+    expect(m.fragmentacionExterna).toBeCloseTo(27.01, 2);
+});
+
+    it("tick 9: P2 termina y su bloque se une con el hueco de la izquierda, 11.86% de fragmentacion", () => {
+        const simulador = simuladorDeLaConsigna();
+
+        avanzar(simulador, 9);
+
+        const m = simulador.metricasMemoria();
+        expect(m.libreTotal).toBe(624);
+        expect(m.mayorHueco).toBe(550);
+        expect(m.fragmentacionExterna).toBeCloseTo(11.86, 2);
+        expect(simulador.mapaMemoria()).toEqual(["[0-550 KB] LIBRE", "[550-950 KB] P4", "[950-1024 KB] LIBRE"]);
+    });
+
     it("tras 12 ticks todos terminaron, CPU 100% y 2 cambios de contexto", ()=>{
         const simulador = simuladorDeLaConsigna();
 

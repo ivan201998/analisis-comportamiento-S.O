@@ -50,8 +50,8 @@ describe("AdministradorMemoria (First-Fit)", () => {
         memoria.asignar(new Proceso("B", 100, 1));   // 300-400
         memoria.asignar(new Proceso("C", 200, 1));   // 400-600
         memoria.asignar(new Proceso("D", 100, 1));   // 600-700
-        memoria.liberar("A");                            // hueco 300 al inicio
-        memoria.liberar("C");                            // hueco 200 en el medio
+        memoria.liberar("A");                        // hueco 300 al inicio
+        memoria.liberar("C");                        // hueco 200 en el medio
 
         memoria.asignar(new Proceso("E", 150, 1));
 
@@ -140,5 +140,30 @@ describe("AdministradorMemoria (First-Fit)", () => {
         expect(() => new AdministradorMemoria(0)).toThrow();
         expect(() => new AdministradorMemoria(-100)).toThrow();
         expect(() => new AdministradorMemoria(10.5)).toThrow();
+    });
+    //metodo nuevo 
+    it("casos 2 y 3 de la catedra: 50% de fragmentacion y la coalescencia la deja en 0%", () => {
+        const memoria = new AdministradorMemoria();
+        memoria.asignar(new Proceso("P1", 200, 1));
+        memoria.asignar(new Proceso("A", 200, 1));
+        memoria.asignar(new Proceso("P2", 224, 1));
+        memoria.asignar(new Proceso("B", 200, 1));
+        memoria.asignar(new Proceso("P3", 200, 1));
+        memoria.liberar("A");
+        memoria.liberar("B");
+
+        const antes = memoria.metricas();
+        expect(antes.ocupada).toBe(624);
+        expect(antes.libreTotal).toBe(400);
+        expect(antes.mayorHueco).toBe(200);
+        expect(antes.fragmentacionExterna).toBe(50);
+
+        memoria.liberar("P2");
+
+        const despues = memoria.metricas();
+        expect(despues.libreTotal).toBe(624);
+        expect(despues.mayorHueco).toBe(624);
+        expect(despues.fragmentacionExterna).toBe(0);
+        expect(memoria.mapa()).toEqual(["[0-200 KB] P1", "[200-824 KB] LIBRE", "[824-1024 KB] P3"]);
     });
 });
