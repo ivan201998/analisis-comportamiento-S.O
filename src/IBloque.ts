@@ -1,4 +1,4 @@
-import { Proceso } from "./Proceso";
+import { Proceso } from './Proceso';
 
 // Contrato publico de una particion de memoria. BloqueMemoria lo implementa.
 export interface IBloque {
@@ -13,6 +13,6 @@ export interface IBloque {
     liberar(): void;
     puedeFusionarCon(otro: IBloque): boolean;
     fusionarCon(otro: IBloque): void;
-    descibir(): string;
+    describir(): string;
 
 }
