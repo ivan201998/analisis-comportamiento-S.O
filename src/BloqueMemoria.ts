@@ -2,7 +2,7 @@ import { IBloque } from './IBloque';
 import { Proceso } from './Proceso';
 
 // Una particion contigua de la RAM, libre u ocupada.
-export class BloqueoMemoria implements IBloque{
+export class BloqueMemoria  implements IBloque{
 
     // ENCAPSULAMIENTO: los 3 campos son privados. Se leen y se escriben solo a traves de
     // los get/set protegidos y de los metodos publicos (ocuparCon, liberar, fusionarCon...),
@@ -67,23 +67,32 @@ export class BloqueoMemoria implements IBloque{
     }
 
     // Se achica al tamano del proceso y devuelve el sobrante como bloque libre (lista de 0 o 1).
-    ocuparCon(proceso: Proceso): BloqueMemoria[] {
+    ocuparCon(proceso: Proceso): BloqueMemoria [] {
+        const sobrante = new BloqueMemoria (
+            this.getInicio() + proceso.tamanoMemoria,
+            this.getTamano() - proceso.tamanoMemoria
+        );
 
+        this.setTamano(proceso.tamanoMemoria);
+        this.setOcupante(proceso.pid);
+
+        return [sobrante].filter(bloque => !bloque.esVacio());
     }
 
     liberar(): void {
-
+        this.setOcupante(undefined);
     }
 
     puedeFusionarCon(otro: BloqueMemoria): boolean {
-
+        return this.estaLibre() && otro.estaLibre();
     }
 
     fusionarCon(otro: BloqueMemoria): void {
-
+        this.setTamano(this.getTamano() + otro.capacidad());
     }
 
     describir(): string {
-        
+        return `[${this.getInicio()}-${this.getInicio() + this.getTamano()} KB] ${this.getOcupante() ?? "LIBRE"}`;
+
     }
 }

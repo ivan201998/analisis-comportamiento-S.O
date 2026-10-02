@@ -55,22 +55,48 @@ describe("BloqueMemoria", ()=>{
     })
 
     it("liberar lo deja libre otra vez", ()=>{
+        const bloque = new BloqueMemoria(0, 100);
+        bloque.ocuparCon(new Proceso("P1", 100, 1));
 
+        bloque.liberar();
+
+        expect(bloque.estaLibre()).toBe(true);
     })
 
     it("cuenta sus KB como libres u ocupados segun su estado", ()=>{
-        
+        const bloque = new BloqueMemoria(0, 100);
+        expect(bloque.kbLibres()).toBe(100);
+        expect(bloque.kbOcupados()).toBe(0);
+
+        bloque.ocuparCon(new Proceso("P1", 100, 1));
+        expect(bloque.kbLibres()).toBe(0);
+        expect(bloque.kbOcupados()).toBe(100);
     })
 
     it("dos bloques libres pueden fusionarse y suman su tamano", ()=>{
-        
+        const a = new BloqueMemoria(0, 100);
+        const b = new BloqueMemoria(100, 50);
+
+        expect(a.puedeFusionarCon(b)).toBe(true);
+        a.fusionarCon(b);
+
+        expect(a.capacidad()).toBe(150);
     })
 
     it("un bloque ocupado no puede fusionarse", ()=>{
-        
+        const a = new BloqueMemoria(0, 100);
+        const b = new BloqueMemoria(100, 50);
+
+        b.ocuparCon(new Proceso("P1", 50, 1));
+
+        expect(a.puedeFusionarCon(b)).toBe(false);
     })
 
     it("se describe con su rango y su ocupante", ()=>{
+        const bloque = new BloqueMemoria(200, 350);
+
+        bloque.ocuparCon(new Proceso("P2", 350, 1));
         
+        expect(bloque.describir()).toBe("[200-550 KB] P2");
     })
 })
