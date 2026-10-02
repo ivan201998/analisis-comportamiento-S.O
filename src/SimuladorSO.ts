@@ -42,7 +42,7 @@ export class SimuladorSO implements ISimulador {
     private static enteroPositivo(valor: number, nombre: string): number {
 
         const esValido = Number.isInteger(valor) && valor > 0;
-        return esValido ? valor : SimuladorSO.error("${nombre} debe ser un entero positivo");
+        return esValido ? valor : SimuladorSO.error(`${nombre} debe ser un entero positivo`);
 
 
     }
@@ -69,7 +69,7 @@ export class SimuladorSO implements ISimulador {
         const reglas: Array<[boolean, string]> = [
             [existentes.some(p => p.pid === proceso.pid), `Ya existe un proceso con PID ${proceso.pid}`],
             [proceso.tamanoMemoria > memoriaTotal,
-                "El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)"]
+                `El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)`]
         ];
         const incumplida = reglas.find(([condicion]) => condicion);
 
@@ -180,7 +180,7 @@ export class SimuladorSO implements ISimulador {
     // Estado de cada proceso, en el orden en que se agregaron. Ej: "P1: EJECUTANDO".
     estados(): string[] {
 
-        return this.todos.map(proceso => "${proceso.pid}: ${proceso.describirEstado()}");
+        return this.todos.map(proceso => `${proceso.pid}: ${proceso.describirEstado()}`);
 
     }
 

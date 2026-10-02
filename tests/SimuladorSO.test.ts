@@ -170,30 +170,68 @@ describe("SimuladorSO", ()=>{
     })
 
     it("estados tick 6: P3 termina y queda TERMINADO", ()=>{
+        const simulador = simuladorDeLaConsigna();
 
+        avanzar(simulador, 6);
+
+        expect(simulador.estados()[2]).toBe("P3: TERMINADO");
     })
 
     it("estados tick 12: todos TERMINADOS", ()=>{
-        
+        const simulador = simuladorDeLaConsigna();
+
+        avanzar(simulador, 12);
+
+        expect(simulador.estados()).toEqual(["P1: TERMINADO", "P2: TERMINADO", "P3: TERMINADO", "P4: TERMINADO"]);
     })
 
     it("estados: un proceso con E/S pasa por EJECUTANDO, BLOQUEADO y vuelve a EJECUTANDO", ()=>{
-        
+        const simulador = new SimuladorSO(2);
+        simulador.agregarProceso(new ProcesoConES("A", 100, 5));
+
+        avanzar(simulador, 1);
+        expect(simulador.estados()).toEqual(["A: EJECUTANDO"]);
+
+        simulador.bloquearProcesoActual(2);
+        expect(simulador.estados()).toEqual(["A: BLOQUEADO"]);
+
+        avanzar(simulador, 1);   // tick 2: sigue bloqueado
+        expect(simulador.estados()).toEqual(["A: BLOQUEADO"]);
+
+        avanzar(simulador, 1);   // tick 3: termina la E/S y toma la CPU
+        expect(simulador.estados()).toEqual(["A: EJECUTANDO"]);
     })
 
     it("RF01: rechaza un quantum invalido (cero, negativo o decimal)", ()=>{
-        
+        expect(() => new SimuladorSO(0)).toThrow();
+        expect(() => new SimuladorSO(-1)).toThrow();
+        expect(() => new SimuladorSO(1.5)).toThrow();
     })
 
     it("RF02: rechaza un PID duplicado sin registrar el segundo proceso", ()=>{
-        
+        const simulador = new SimuladorSO(2);
+        simulador.agregarProceso(new Proceso("P1", 100, 2));
+
+        expect(() => simulador.agregarProceso(new Proceso("P1", 50, 1))).toThrow();
+        expect(simulador.estados()).toEqual(["P1: NUEVO"]);
     })
 
     it("RF02: rechaza un proceso que pide mas memoria que el total", ()=>{
-        
+        const simulador = new SimuladorSO(2, 1024);
+
+        expect(() => simulador.agregarProceso(new Proceso("P1", 2000, 1))).toThrow();
+        expect(simulador.estados()).toEqual([]);
     })
 
     it("RF10: expone el tick actual y el pid del proceso que esta en la CPU", ()=>{
-        
+        const simulador = simuladorDeLaConsigna();
+
+        expect(simulador.tickActual()).toBe(0);
+        expect(simulador.procesoEnCpu()).toBeUndefined();
+
+        avanzar(simulador, 1);
+
+        expect(simulador.tickActual()).toBe(1);
+        expect(simulador.procesoEnCpu()).toBe("P1");
     })
 })
