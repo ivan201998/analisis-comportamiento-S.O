@@ -59,5 +59,23 @@ describe("SimuladorSO", ()=>{
         expect(simulador.mapaMemoria()).toContain("[550-950 KB] P4");
     })
 
-    
+    it("tras 12 ticks todos terminaron, CPU 100% y 2 cambios de contexto", ()=>{
+
+    })
+
+    it("RF09: en el tick 0, antes de avanzar, el uso de CPU es 0%", ()=>{
+        
+    })
+
+    it("la CPU ociosa baja el uso de CPU", ()=>{
+        
+    })
+
+    it("un proceso con E/S bloqueado vuelve a listos cuando termina su espera", ()=>{
+        
+    })
+
+    it("un proceso sin E/S ignora el pedido de bloqueo", ()=>{
+        
+    })
 })

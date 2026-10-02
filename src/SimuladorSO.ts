@@ -44,6 +44,47 @@ export class SimuladorSO implements ISimulador {
         const esValido = Number.isInteger(valor) && valor > 0;
         return esValido ? valor : SimuladorSO.error(`${nombre} debe ser un entero positivo`);
 
+
+    }
+
+    // Metodo de apoyo solo para poder "lanzar el error" desde dentro de un ternario
+    // (throw no se puede usar como expresion). Nunca devuelve nada: siempre corta la ejecucion.
+    private static error(mensaje: string): never {
+
+        throw new Error(mensaje);
+
+    }
+
+    // RF02: rechaza PID duplicados y procesos que piden mas memoria que el total, sin registrar nada.
+    agregarProceso(proceso: Proceso): void {
+
+        SimuladorSO.validarRegistro(proceso, this.todos, this.memoria.metricas().total);
+
+        this.todos.push(proceso);
+        this.colas.agregarNuevo(proceso);
+
+    }
+
+    private static validarRegistro(proceso: Proceso, existentes: Proceso[], memoriaTotal: number): void{
+        const reglas: Array<[boolean, string]> = [
+            [existentes.some(p => p.pid === proceso.pid), `Ya existe un proceso con PID ${proceso.pid}`],
+            [proceso.tamanoMemoria > memoriaTotal,
+                `El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)`]
+        ];
+        const incumplida = reglas.find(([condicion]) => condicion);
+
+        incumplida ? SimuladorSO.error(incumplida[1]) : undefined;
+
+    }
+
+    
+    // RF08: fuerza el paso del proceso en CPU a BLOQUEADO (solo si admite E/S).
+    bloquearProcesoActual(ticks: number = 2): void {
+
+        const proceso = this.planificador.procesoActivo();
+        const bloqueable = proceso !== undefined && proceso.admiteES();
+
+        bloqueable ? this.ejecutarBloqueo(proceso as Proceso, ticks) : undefined;
         
     }
 }
