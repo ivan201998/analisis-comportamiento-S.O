@@ -70,5 +70,56 @@ export class AdministradorMemoria implements IGestorMemoria {
         return elegido !== undefined;
 
     }
+    liberar(pid: string): void {
 
+        this.getBloques().filter(bloque => bloque.esDe(pid)).forEach(bloque => bloque.liberar());
+
+        this.coalescer();
+
+    }
+
+    // Fusiona bloques libres contiguos recorriendo la lista una sola vez.
+    private coalescer(): void {
+
+        this.setBloques(this.getBloques().reduce<BloqueMemoria[]>(AdministradorMemoria.unir, []));
+
+    }
+
+    private static unir(acumulados: BloqueMemoria[], bloque: BloqueMemoria): BloqueMemoria[] {
+
+        const ultimo = acumulados.at(-1);
+
+        ultimo?.puedeFusionarCon(bloque) ? ultimo.fusionarCon(bloque) : acumulados.push(bloque);
+
+        return acumulados;
+
+    }
+
+    // fragmentacionExterna = (1 - mayorHueco / libreTotal) * 100, escrita para que de 0 sin memoria libre.
+    metricas(): IMetricas {
+
+        const suma = (valores: number[]) => valores.reduce((a, b) => a + b, 0);
+        const ocupada = suma(this.getBloques().map(bloque => bloque.kbOcupados()));
+        const libreTotal = suma(this.getBloques().map(bloque => bloque.kbLibres()));
+        const mayorHueco = this.getBloques()
+            .map(bloque => bloque.kbLibres())
+            .reduce((mayor, actual) => actual > mayor ? actual : mayor, 0);
+        const libreParaDividir = libreTotal > 0 ? libreTotal : 1;
+
+        return {
+            total: this.tamanoTotal,
+            ocupada,
+            libreTotal,
+            mayorHueco,
+            porcentajeOcupacion: (ocupada / this.tamanoTotal) * 100,
+            fragmentacionExterna: ((libreTotal - mayorHueco) / libreParaDividir) * 100
+        };
+
+    }
+
+    mapa(): string[] {
+
+        return this.getBloques().map(bloque => bloque.describir());
+
+    }
 }
