@@ -16,7 +16,7 @@ import { Estado } from '../src/Proceso';
 //    Teoría: al crearse un proceso, el sistema le arma su PCB y lo deja en estado NUEVO.
 //    Después pasa por los estados según lo que le ocurra. La consigna pide 6 estados.
 // ---------------------------------------------------------------------------
-describe("Proceso CPU", () => {
+describe("Estados de un proceso", () => {
     
     // Teoría: todo proceso nace en NUEVO (todavía no fue admitido ni tiene memoria).
     // Verifica además estaEn() y describirEstado(), que el reporte usa para mostrar el estado.
