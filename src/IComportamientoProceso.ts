@@ -4,8 +4,11 @@
 
 import type { Estado } from './Proceso';
 
-// Contrato publico de un proceso. Proceso lo implementa, y ProcesoConES lo hereda
-// (y lo vuelve a declarar) al extender de Proceso.
+// Contrato público de un proceso. Proceso lo implementa y ProcesoConES lo hereda.
+// [SOLID · I] es el contrato de UN solo tema (el proceso), separado de los de colas, memoria o CPU.
+// [SOLID · D] la idea es que quien necesite «un proceso» dependa de este contrato. Hoy las demás
+//     clases usan directamente el tipo Proceso; para inversión de dependencias total habría que
+//     cambiarlas a IComportamientoProceso.
 
 export interface ComportamientoProceso{
     

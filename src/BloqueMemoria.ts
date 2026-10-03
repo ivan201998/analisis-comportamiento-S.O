@@ -1,7 +1,15 @@
 import { IBloque } from './IBloque';
 import { Proceso } from './Proceso';
 
-// Una particion contigua de la RAM, libre u ocupada.
+// Teoría (Temas 9 y 10): en la asignación contigua la RAM es una sucesión de bloques, cada uno
+// libre (hueco) u ocupado por un proceso. Esta clase es UN bloque.
+//
+// PRINCIPIOS QUE APLICA
+// [SOLID · S] solo sabe de SU pedazo de memoria (dónde empieza, cuánto mide, quién lo ocupa).
+//     La lista completa y las políticas las manejan otras clases.
+// [POO · Encapsulamiento] inicio, tamano y ocupante son privados; se usan métodos.
+// [SOLID · I] implementa IBloque, el contrato público de un bloque.
+
 export class BloqueMemoria  implements IBloque{
 
     // ENCAPSULAMIENTO: los 3 campos son privados. Se leen y se escriben solo a traves de
@@ -37,7 +45,7 @@ export class BloqueMemoria  implements IBloque{
     protected setOcupante(pid: string | undefined): void {
         this.ocupante = pid;
     }
-
+    // Un bloque está libre (es un «hueco») si no tiene ocupante.
     estaLibre(): boolean {
         return this.getOcupante() === undefined;
     }
@@ -49,7 +57,7 @@ export class BloqueMemoria  implements IBloque{
     esVacio(): boolean {
         return this.getTamano() === 0;
     }
-
+    // Asignación contigua (Tema 10): el proceso entra si el bloque está libre y alcanza.
     entra(proceso: Proceso): boolean {
         return this.estaLibre() && this.getTamano() >= proceso.tamanoMemoria;
     }
@@ -57,7 +65,7 @@ export class BloqueMemoria  implements IBloque{
     capacidad(): number {
         return this.getTamano();
     }
-    
+    // Aporta a «memoria libre total»: sus KB si está libre, 0 si está ocupado.
     kbLibres(): number{
         return this.getTamano() * Number(this.estaLibre());
     }
@@ -66,7 +74,8 @@ export class BloqueMemoria  implements IBloque{
         return this.capacidad() - this.kbLibres();
     }
 
-    // Se achica al tamano del proceso y devuelve el sobrante como bloque libre (lista de 0 o 1).
+    // Splitting: el bloque se achica al tamaño del proceso, se marca ocupado y devuelve el sobrante
+    // como un bloque libre nuevo (una lista de 0 o 1 elementos: si entra justo, no hay sobrante).
     ocuparCon(proceso: Proceso): BloqueMemoria [] {
         const sobrante = new BloqueMemoria (
             this.getInicio() + proceso.tamanoMemoria,
@@ -82,15 +91,16 @@ export class BloqueMemoria  implements IBloque{
     liberar(): void {
         this.setOcupante(undefined);
     }
-
+    // Coalescencia (Tema 15): dos bloques se fusionan solo si los dos están libres.
     puedeFusionarCon(otro: BloqueMemoria): boolean {
         return this.estaLibre() && otro.estaLibre();
     }
-
+    // Suma el tamaño del vecino: el hueco crece.
     fusionarCon(otro: BloqueMemoria): void {
         this.setTamano(this.getTamano() + otro.capacidad());
     }
 
+    // Texto para el mapa de memoria: [inicio-fin KB] dueño (o LIBRE).
     describir(): string {
         return `[${this.getInicio()}-${this.getInicio() + this.getTamano()} KB] ${this.getOcupante() ?? "LIBRE"}`;
 

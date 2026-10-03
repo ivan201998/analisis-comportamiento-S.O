@@ -1,6 +1,8 @@
 import { Proceso } from './Proceso';
 
-// Contrato publico de las colas de procesos. ColasProcesos lo implementa.
+// Contrato público de las colas de procesos. ColasProcesos lo implementa.
+// [SOLID · D] SimuladorSO depende de este contrato, no de la clase concreta. [SOLID · I] solo
+//     contiene lo relacionado con mover procesos entre colas.
 export interface IColas {
     agregarNuevo(proceso: Proceso): void;
     ingresarNuevos(): void;

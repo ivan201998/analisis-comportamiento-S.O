@@ -1,26 +1,32 @@
-import { Colas } from './IColas';
+import { IColas } from './IColas';
 import { Estado, Proceso } from './Proceso';
 
-// Las 3 salas de espera del proceso (esperando memoria, listos, bloqueados) mas los dos
-// extremos del ciclo de vida (nuevos y terminados). RESPONSABILIDAD UNICA: esta clase solo
-// mueve procesos de una cola a otra; no sabe nada de memoria ni de CPU.
+// Teoría (Temas 2 y 5): el estado de un proceso cambia a medida que se mueve entre colas.
+// Acá están las «salas de espera»: nuevos, esperando memoria, listos, bloqueados y terminados.
+//
+// PRINCIPIOS QUE APLICA
+// [SOLID · S] solo mueve procesos de una cola a otra. No sabe de memoria ni de CPU.
+// [POO · Encapsulamiento] las 5 listas son privadas; todo pasa por los métodos de abajo.
+// [SOLID · D] bajo acoplamiento: para reintentar la memoria recibe una FUNCIÓN por parámetro,
+//     así no necesita conocer a AdministradorMemoria.
+// [SOLID · I] implementa IColas, el contrato de las colas; SimuladorSO depende de ese contrato.
 
-export class ColasProcesos implements Colas {
-    // ENCAPSULAMIENTO: las 5 listas son privadas. Nadie de afuera empuja o saca procesos
-    // directo; todo pasa por los metodos de abajo.
-
+export class ColasProcesos implements IColas {
+    // [POO · Encapsulamiento] listas privadas: nadie de afuera empuja o saca procesos directo.
     private nuevos: Proceso [] = [];
     private esperaMemoria: Proceso[] = [];
     private listos: Proceso[] = [];
     private bloqueados: Proceso[] = [];
     private terminados: Proceso[] = [];
 
+    // Todo proceso entra al sistema en estado NUEVO (Tema 2).
     agregarNuevo(proceso: Proceso): void{
 
         proceso.cambiarEstado(Estado.NUEVO);
         this.nuevos.push(proceso);
     }
 
+    // Admisión: los NUEVOS pasan a esperar memoria (planificación de largo plazo, Tema 5).
     ingresarNuevos(): void{
 
         this.nuevos.forEach(proceso => proceso.cambiarEstado(Estado.ESPERANDO_MEMORIA));
@@ -29,9 +35,9 @@ export class ColasProcesos implements Colas {
 
     }
 
-    // RF03: reintenta la asignacion en orden de registro. Recibe COMO PARAMETRO la funcion
-    // que intenta asignar memoria (se la pasa SimuladorSO), asi esta clase no necesita
-    // conocer a AdministradorMemoria (bajo acoplamiento).
+    // Cada tick se reintenta alojar en RAM, EN ORDEN DE LLEGADA, a los que esperan memoria. Los que
+    // consiguen lugar pasan a LISTO. La función `intentarAsignar` la pasa SimuladorSO (inyección de
+    // dependencia): esta clase no conoce a AdministradorMemoria.
 
     reintentarMemoria(intentarAsignar: (proceso: Proceso) => boolean): void {
         const ubicados = this.esperaMemoria.filter(intentarAsignar);
@@ -43,6 +49,8 @@ export class ColasProcesos implements Colas {
         this.listos.push(...ubicados);
     }
 
+    // Entrada/salida: a cada BLOQUEADO le baja la espera; el que termina vuelve a LISTO, NO a ejecución
+    // (Tema 2). Polimorfismo: llama a avanzarBloqueo() sin saber de qué clase es el proceso.
     avanzarBloqueados(): void{
         this.bloqueados.forEach(proceso => proceso.avanzarBloqueo());
 
@@ -54,18 +62,20 @@ export class ColasProcesos implements Colas {
 
     }
 
+    // El planificador lo usa para decidir si un proceso que agotó su quantum rota o renueva.
     hayListos(): boolean {
 
         return this.listos.length > 0;
 
     }
 
+    // Cola FIFO (Round-Robin, Tema 7): sale el que lleva más tiempo esperando.
     tomarListo(): Proceso | undefined {
 
         return this.listos.shift();
 
     }
-
+    // Un proceso que agotó su quantum vuelve al FINAL de la cola de listos.
     reencolar(proceso: Proceso): void {
 
         proceso.cambiarEstado(Estado.LISTO);
@@ -73,13 +83,15 @@ export class ColasProcesos implements Colas {
 
     }
 
+    // EJECUTANDO -> BLOQUEADO: queda esperando su E/S.
     bloquear(proceso: Proceso): void {
 
         proceso.cambiarEstado(Estado.BLOQUEADO);
         this.bloqueados.push(proceso);
 
     }
-
+    
+    // Fin del ciclo de vida: el proceso queda TERMINADO y registrado, en orden de finalización.
     terminar(proceso: Proceso): void {
 
         proceso.cambiarEstado(Estado.TERMINADO);
@@ -87,6 +99,7 @@ export class ColasProcesos implements Colas {
 
     }
 
+    // [POO · Encapsulamiento] las consultas devuelven solo los PIDs (texto), nunca las listas internas.
     pidsListos(): string[] {
 
         return this.listos.map(proceso => proceso.pid);
