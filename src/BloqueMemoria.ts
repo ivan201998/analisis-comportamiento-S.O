@@ -38,6 +38,8 @@ export class BloqueMemoria  implements IBloque{
         this.tamano = valor;
     }
 
+    //undefined significa «no hay nada». 
+    //En BloqueMemoria se usa para decir que el bloque está libre.
     protected getOcupante(): string | undefined {
         return this.ocupante;
     }
@@ -76,17 +78,17 @@ export class BloqueMemoria  implements IBloque{
 
     // Splitting: el bloque se achica al tamaño del proceso, se marca ocupado y devuelve el sobrante
     // como un bloque libre nuevo (una lista de 0 o 1 elementos: si entra justo, no hay sobrante).
-    ocuparCon(proceso: Proceso): BloqueMemoria [] {
-        const sobrante = new BloqueMemoria (
-            this.getInicio() + proceso.tamanoMemoria,
-            this.getTamano() - proceso.tamanoMemoria
-        );
+    ocuparCon(proceso: Proceso): BloqueMemoria[] {
+        const inicioSobrante = this.getInicio() + proceso.tamanoMemoria;   // dónde empieza lo que sobra
+        const tamanoSobrante = this.getTamano() - proceso.tamanoMemoria;   // cuánto sobra
+        const sobrante = new BloqueMemoria(inicioSobrante, tamanoSobrante);
 
-        this.setTamano(proceso.tamanoMemoria);
-        this.setOcupante(proceso.pid);
+        this.setTamano(proceso.tamanoMemoria);   // el bloque se achica al tamaño del proceso
+        this.setOcupante(proceso.pid);           // y queda ocupado por él
 
-        return [sobrante].filter(bloque => !bloque.esVacio());
+        return sobrante.esVacio() ? [] : [sobrante];   // si no sobró nada, lista vacía
     }
+
 
     liberar(): void {
         this.setOcupante(undefined);
@@ -102,7 +104,9 @@ export class BloqueMemoria  implements IBloque{
 
     // Texto para el mapa de memoria: [inicio-fin KB] dueño (o LIBRE).
     describir(): string {
-        return `[${this.getInicio()}-${this.getInicio() + this.getTamano()} KB] ${this.getOcupante() ?? "LIBRE"}`;
+        const fin = this.getInicio() + this.getTamano();
+        const dueno = this.getOcupante() ?? "LIBRE";
 
+        return `[${this.getInicio()}-${fin} KB] ${dueno}`;
     }
 }

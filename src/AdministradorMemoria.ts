@@ -68,15 +68,20 @@ export class AdministradorMemoria implements IGestorMemoria {
     // importa si es FirstFit u otra, se usa igual. Si hay hueco, el bloque se divide (splitting) y se
     // inserta el sobrante justo después. Devuelve false si el proceso no entra en ningún hueco.
     asignar(proceso: Proceso): boolean {
-
         const elegido = this.estrategia.elegirBloque(this.getBloques(), proceso);
-        const sobrantes = new Map([[elegido, elegido?.ocuparCon(proceso) ?? []]]);
 
-        this.setBloques(this.getBloques().flatMap(bloque => [bloque, ...(sobrantes.get(bloque) ?? [])]));
+        elegido ? this.ocupar(elegido, proceso) : undefined;
 
         return elegido !== undefined;
-
     }
+
+    private ocupar(bloque: BloqueMemoria, proceso: Proceso): void {
+        const posicion = this.getBloques().indexOf(bloque);
+        const sobrante = bloque.ocuparCon(proceso);
+
+        this.getBloques().splice(posicion + 1, 0, ...sobrante);
+    }
+
     // Tema 15: libera el bloque del proceso que terminó y fusiona los huecos vecinos (coalescencia).
     liberar(pid: string): void {
 
@@ -102,6 +107,9 @@ export class AdministradorMemoria implements IGestorMemoria {
         ultimo?.puedeFusionarCon(bloque) ? ultimo.fusionarCon(bloque) : acumulados.push(bloque);
 
         return acumulados;
+
+        // Un paso de la coalescencia: si el bloque que llega y 
+        // el último guardado están libres, se fusionan; si no, se guarda aparte.
 
     }
 

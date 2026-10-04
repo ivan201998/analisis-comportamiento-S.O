@@ -5,7 +5,7 @@ import { ComportamientoProceso } from './IComportamientoProceso';
 // agrega ESPERANDO_MEMORIA porque la consigna lo pide: en memoria contigua un proceso puede
 // no entrar a la RAM y tiene que esperar.
 
-export enum Estado{
+export enum Estado{ //enum: una lista fija de valores con nombre. Define los seis estados por los que puede pasar un proceso
     NUEVO = "NUEVO",
     ESPERANDO_MEMORIA = "ESPERANDO_MEMORIA",
     LISTO = "LISTO",
@@ -121,22 +121,27 @@ export class Proceso implements ComportamientoProceso {
     //
     // Reemplaza a Math.max: si a es mayor, se queda con a; si no, con b.
     // Protegido para que ProcesoConES tambien lo pueda usar.
-    protected mayorEntre(a: number, b: number): number {
+    protected mayorEntre(a: number, b: number): number { //método auxiliar que devuelve el mayor de dos números
 
         return a > b ? a : b;
 
     }
     // Tema 7: terminó cuando no le queda tiempo de CPU.
     estaTerminado(): boolean {
-
+        // Terminó cuando no le queda tiempo de CPU: el tiempo restante es menor o igual a 0.
+        // Se usa <= y no == para que, si bajara de 0, igual se lo considere terminado. 
         return this.getTiempoRestante() <= 0;
 
     }
     // Temas 7 y 8: ¿consumió todo su turno? El planificador usa esto para decidir si lo rota.
     agotoQuantum(limite: number): boolean {
-
+        // Agotó su turno cuando los ticks que consumió seguidos llegan al quantum (mayor o igual).
+        // Se usa >= para cubrir también el caso de haberse pasado del límite.
         return this.getQuantumConsumido() >= limite;
 
+        //porque limite no usa get 
+        // El límite viene por parámetro y no con un get porque el quantum es del planificador, 
+        // no del proceso: así Proceso no duplica ese dato ni depende de Round-Robin.
     }
     // Empieza un turno nuevo (al volver a la cola o al renovar el quantum).
     reiniciarQuantum(): void {

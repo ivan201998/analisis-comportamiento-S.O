@@ -53,8 +53,10 @@ export class SimuladorSO implements ISimulador {
     private static enteroPositivo(valor: number, nombre: string): number {
 
         const esValido = Number.isInteger(valor) && valor > 0;
-        return esValido ? valor : SimuladorSO.error(`${nombre} debe ser un entero positivo`);
 
+        esValido || SimuladorSO.error(`${nombre} debe ser un entero positivo`);
+
+        return valor;
 
     }
 
@@ -76,18 +78,14 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    private static validarRegistro(proceso: Proceso, existentes: Proceso[], memoriaTotal: number): void{
-        const reglas: Array<[boolean, string]> = [
-            [existentes.some(p => p.pid === proceso.pid), `Ya existe un proceso con PID ${proceso.pid}`],
-            [proceso.tamanoMemoria > memoriaTotal,
-                `El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)`]
-        ];
-        const incumplida = reglas.find(([condicion]) => condicion);
+   private static validarRegistro(proceso: Proceso, existentes: Proceso[], memoriaTotal: number): void{
 
-        incumplida ? SimuladorSO.error(incumplida[1]) : undefined;
+        existentes.some(p => p.pid === proceso.pid) && SimuladorSO.error(`Ya existe un proceso con PID ${proceso.pid}`);
+
+        proceso.tamanoMemoria > memoriaTotal
+            && SimuladorSO.error(`El proceso ${proceso.pid} pide ${proceso.tamanoMemoria} KB, mas que el total (${memoriaTotal} KB)`);
 
     }
-
     
     // RF08: fuerza el paso del proceso que está en la CPU a BLOQUEADO (Tema 2), pero solo si admite
     // E/S. [POO · Polimorfismo]: pregunta admiteES() sin saber qué clase es.
@@ -138,8 +136,8 @@ export class SimuladorSO implements ISimulador {
 
         this.estadisticas.registrarEjecucion(resultado.ocupado);
 
-        resultado.terminado ? this.finalizarProceso(resultado.terminado) : undefined;
-        resultado.rotado ? this.rotarProceso(resultado.rotado) : undefined;
+        resultado.terminado && this.finalizarProceso(resultado.terminado);
+        resultado.rotado && this.rotarProceso(resultado.rotado);
 
     }
 

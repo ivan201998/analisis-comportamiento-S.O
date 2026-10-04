@@ -70,16 +70,16 @@ export class PlanificadorRoundRobin implements IPlanificador {
         const proceso = this.enCpu;
         const ocupado = proceso !== undefined;
 
-        proceso?.ejecutarTick();
+        ocupado && proceso.ejecutarTick();
 
-        const termino = ocupado && (proceso as Proceso).estaTerminado();
-        const vencioQuantum = ocupado && !termino && (proceso as Proceso).agotoQuantum(this.quantum);
+        const termino = ocupado && proceso.estaTerminado();
+        const vencioQuantum = ocupado && !termino && proceso.agotoQuantum(this.quantum);
         const rota = vencioQuantum && hayOtrosListos;
         const renueva = vencioQuantum && !hayOtrosListos;
 
-        termino ? this.finalizar() : undefined;
-        rota ? this.expulsarPorQuantum() : undefined;
-        renueva ? proceso?.reiniciarQuantum() : undefined;
+        termino && this.finalizar();
+        rota && this.expulsarPorQuantum();
+        renueva && proceso.reiniciarQuantum();
 
         return {
             ocupado,

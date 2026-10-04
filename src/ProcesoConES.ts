@@ -52,3 +52,4 @@ export class ProcesoConES extends Proceso implements ComportamientoProceso{
         return this.getTiempoBloqueo() > 0;
     }
 }
+//override pisa lo que hacía el padre con algo propio de la hija.

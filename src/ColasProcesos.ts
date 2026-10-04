@@ -13,7 +13,7 @@ import { Estado, Proceso } from './Proceso';
 
 export class ColasProcesos implements IColas {
     // [POO · Encapsulamiento] listas privadas: nadie de afuera empuja o saca procesos directo.
-    private nuevos: Proceso [] = [];
+    private nuevos: Proceso [] = []; //clase que guarda las cinco filas de procesos del simulador.
     private esperaMemoria: Proceso[] = [];
     private listos: Proceso[] = [];
     private bloqueados: Proceso[] = [];
@@ -45,6 +45,7 @@ export class ColasProcesos implements IColas {
         this.esperaMemoria = this.esperaMemoria.filter(proceso => !ubicados.includes(proceso));
 
         ubicados.forEach(proceso => proceso.cambiarEstado(Estado.LISTO));
+        //a cada proceso que consiguió memoria, lo pasa al estado LISTO.
 
         this.listos.push(...ubicados);
     }
@@ -58,8 +59,10 @@ export class ColasProcesos implements IColas {
 
         this.bloqueados = this.bloqueados.filter(proceso => proceso.estaBloqueado());
         despiertos.forEach(proceso => proceso.cambiarEstado(Estado.LISTO));
+        //es la lista de procesos bloqueados cuya espera ya terminó (se calculó dos líneas más arriba).
         this.listos.push(...despiertos);
-
+        //desparraman» la lista y agregan los procesos de a uno. 
+        //Quedan detrás de los que ya estaban esperando, porque la fila es FIFO.
     }
 
     // El planificador lo usa para decidir si un proceso que agotó su quantum rota o renueva.
@@ -70,8 +73,8 @@ export class ColasProcesos implements IColas {
     }
 
     // Cola FIFO (Round-Robin, Tema 7): sale el que lleva más tiempo esperando.
-    tomarListo(): Proceso | undefined {
-
+    tomarListo(): Proceso | undefined {// | El método puede devolver dos cosas distintas
+                                       // Proceso, si la fila tenía alguien o undefined, que es «no hay nada», si la fila estaba vacía.
         return this.listos.shift();
 
     }
@@ -103,18 +106,18 @@ export class ColasProcesos implements IColas {
     pidsListos(): string[] {
 
         return this.listos.map(proceso => proceso.pid);
-
+        //map recorre una lista y crea otra nueva, transformando cada elemento
     }
 
     pidsEsperandoMemoria(): string[] {
 
         return this.esperaMemoria.map(proceso => proceso.pid);
-
+        //map recorre una lista y crea otra nueva, transformando cada elemento
     }
 
     pidsTerminados(): string[] {
 
         return this.terminados.map(proceso => proceso.pid);
-
+        //map recorre una lista y crea otra nueva, transformando cada elemento
     }
 }
