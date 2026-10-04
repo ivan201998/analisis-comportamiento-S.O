@@ -13,11 +13,14 @@ function simuladorDeLaConsigna(): SimuladorSO {
     return simulador;
 
 }
+//Crea un simulador con quantum 2, le carga los cuatro procesos del lote de la consigna 
+//(PID, KB, ticks de CPU) y lo devuelve. Lo deja en el tick 0, antes de avanzar el reloj.
 
-
+// Hace avanzar el simulador la cantidad de ticks que se le pida.
 function avanzar(simulador: SimuladorSO, ticks: number): void {
     Array.from({ length: ticks }).forEach(() => simulador.avanzarTick());
 }
+// Hace avanzar el simulador N ticks: crea una lista de N lugares y llama a avanzarTick() por cada uno.
 
 // SimuladorSO = el coordinador. Cada tick repite siempre los mismos pasos, en el mismo orden
 // (Tema 16: simulación por ticks, determinista):
