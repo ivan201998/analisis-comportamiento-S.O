@@ -13,24 +13,35 @@ import { Proceso } from './Proceso';
 import { IResultadoTick } from './IResultadoTick';
 import { ISimulador } from './ISimulador';
 
-// El coordinador: cada tick repite siempre los mismos pasos, en orden.
-// COMPOSICION ("tiene un"): esta clase tiene un IGestorMemoria, una IColas, un
-// IPlanificador y una IEstadisticas. No es ninguna de esas cosas: las orquesta.
-// Ya NO junta la logica de Round-Robin ni de las colas (antes estaban aca fusionadas por
-// el limite de 5 clases); ahora cada una vive en su propia clase, asi que se resolvio el
-// problema de SOLID-S que estaba anotado antes.
-// SOLID (ya no falta la D): los 4 campos de abajo son de tipo INTERFAZ (IGestorMemoria,
-// IColas, IPlanificador, IEstadisticas), no de la clase concreta. Esta clase depende de
-// abstracciones, no de implementaciones, en los 4 colaboradores.
+// Teoría (Tema 16): un simulador avanza por ticks y en cada uno repite los mismos pasos, en el mismo
+// orden (A admisión, B entrada/salida, C despacho, D un tick de CPU). Eso lo hace determinista.
+//
+// PRINCIPIOS QUE APLICA
+// [POO · Composición] «tiene» una memoria, unas colas, un planificador y unas estadísticas, y los
+//     crea él mismo en el constructor. No es ninguna de esas cosas: las ORQUESTA.
+// [SOLID · S] solo coordina. Cada colaboradora tiene su única responsabilidad (colas, CPU, RAM, contadores).
+// [SOLID · D] los 4 campos son de tipo INTERFAZ (IGestorMemoria, IColas, IPlanificador,
+//     IEstadisticas): depende de abstracciones, no de clases concretas.
+// [SOLID · O] se puede cambiar la política de memoria (parámetro `estrategia`) sin modificar esta clase.
+// [POO · Polimorfismo] / [SOLID · L] nunca pregunta si un proceso es común o con E/S: llama a sus
+//     métodos y listo.
+// [POO · Encapsulamiento] todo el estado es privado; el estado se consulta con métodos que devuelven
+//     valores simples (PIDs, textos, números), sin exponer objetos internos (RF10).
+// [SOLID · I] implementa ISimulador, el contrato hacia afuera. Es amplio (órdenes y consultas); se
+//     podría separar en dos interfaces más chicas si creciera.
 
 export class SimuladorSO implements ISimulador {
-
+    // Los 4 colaboradores, tipados con su INTERFAZ (inversión de dependencias).
+    // `todos` guarda el orden de registro para poder informar el estado de cada proceso.
     private memoria: IGestorMemoria;
     private colas: IColas = new ColasProcesos();
     private planificador: IPlanificador;
     private estadisticas: IEstadisticas = new EstadisticasCpu();
     private todos: Proceso[] = [];
 
+    // Quantum, tamaño de RAM y política de memoria se eligen al crear el simulador y no se cambian
+    // después (RF01). Valores por defecto: quantum 2, 1024 KB, First-Fit. [POO · Inyección de
+    // dependencias]: la estrategia llega por parámetro y se la pasa a AdministradorMemoria.
     constructor(quantum: number = 2, tamanoMemoria: number = 1024, estrategia: IEstrategiaAsignacion = new FirstFit()){
 
         this.planificador = new PlanificadorRoundRobin(SimuladorSO.enteroPositivo(quantum, "El quantum"));
@@ -38,7 +49,7 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    // RF01: rechaza configuraciones invalidas antes de crear ningun estado (sin estados parciales).
+    // RF01: rechaza un quantum inválido antes de crear ningún estado (sin estados a medias).
     private static enteroPositivo(valor: number, nombre: string): number {
 
         const esValido = Number.isInteger(valor) && valor > 0;
@@ -47,15 +58,15 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    // Metodo de apoyo solo para poder "lanzar el error" desde dentro de un ternario
-    // (throw no se puede usar como expresion). Nunca devuelve nada: siempre corta la ejecucion.
+    // Auxiliar para lanzar un error desde dentro de un ternario (el proyecto evita `if`). Devuelve
+    // `never`: nunca retorna.
     private static error(mensaje: string): never {
 
         throw new Error(mensaje);
 
     }
 
-    // RF02: rechaza PID duplicados y procesos que piden mas memoria que el total, sin registrar nada.
+    // RF02: rechaza PID duplicados y procesos que piden más memoria que toda la RAM, sin registrar nada.
     agregarProceso(proceso: Proceso): void {
 
         SimuladorSO.validarRegistro(proceso, this.todos, this.memoria.metricas().total);
@@ -78,7 +89,8 @@ export class SimuladorSO implements ISimulador {
     }
 
     
-    // RF08: fuerza el paso del proceso en CPU a BLOQUEADO (solo si admite E/S).
+    // RF08: fuerza el paso del proceso que está en la CPU a BLOQUEADO (Tema 2), pero solo si admite
+    // E/S. [POO · Polimorfismo]: pregunta admiteES() sin saber qué clase es.
     bloquearProcesoActual(ticks: number = 2): void {
 
         const proceso = this.planificador.procesoActivo();
@@ -88,6 +100,8 @@ export class SimuladorSO implements ISimulador {
 
     }
 
+    // EJECUTANDO -> BLOQUEADO: libera la CPU, empieza la espera y cuenta un cambio de contexto.
+    // El proceso bloqueado CONSERVA su memoria: solo se libera cuando termina.
     private ejecutarBloqueo(proceso: Proceso, ticks: number): void {
         this.planificador.liberarCpu();
         proceso.reiniciarQuantum();
@@ -96,7 +110,8 @@ export class SimuladorSO implements ISimulador {
         this.estadisticas.registrarCambioDeContexto();
     }
 
-    // RF06: 1 tick determinista, siempre con el mismo orden de fases.
+    // RF06 / Tema 16: UN tick, siempre con el mismo orden de fases:
+    //   A) nuevos -> esperando memoria, y se reintenta la RAM  B) bloqueados  C) despacho  D) un tick de CPU.
     avanzarTick(): void {
         this.estadisticas.avanzarReloj();
 
@@ -107,6 +122,7 @@ export class SimuladorSO implements ISimulador {
         this.reaccionarAlTick(this.planificador.ejecutarCpu(this.colas.hayListos())); // D: 1 tick de Round-Robin
     }
 
+    // Dispatcher (Tema 5): si la CPU está libre, entra el primero de listos (cola FIFO).
     private despachar(): void {
 
         const candidato = this.planificador.estaLibre() ? this.colas.tomarListo() : undefined;
@@ -115,8 +131,9 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    // POLIMORFISMO / LISKOV: el resto de esta clase nunca pregunta si un Proceso es un
-    // ProcesoConES; llama a sus metodos (ejecutarTick, admiteES...) y listo.
+    // El planificador solo INFORMA qué pasó (IResultadoTick); acá se reacciona: si terminó, se libera su
+    // memoria (con coalescencia); si rotó, vuelve a la cola y se cuenta un cambio de contexto.
+    // [SOLID · S]: cada colaboradora hace lo suyo y SimuladorSO las conecta.
     private reaccionarAlTick(resultado: IResultadoTick): void {
 
         this.estadisticas.registrarEjecucion(resultado.ocupado);
@@ -140,6 +157,7 @@ export class SimuladorSO implements ISimulador {
 
     }
 
+    // Métricas de CPU: se piden a EstadisticasCpu (delegación).
     usoCpu(): number {
 
         return this.estadisticas.usoCpu();
@@ -152,7 +170,7 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    // RF10: estado del sistema consultable, sin exponer los objetos internos.
+    // RF10: el estado del sistema se consulta sin exponer los objetos internos.
     tickActual(): number {
 
         return this.estadisticas.tickActual();
@@ -177,7 +195,7 @@ export class SimuladorSO implements ISimulador {
 
     }
 
-    // Estado de cada proceso, en el orden en que se agregaron. Ej: "P1: EJECUTANDO".
+    // Estado de cada proceso, en el orden de registro. Ej: «P1: EJECUTANDO».
     estados(): string[] {
 
         return this.todos.map(proceso => `${proceso.pid}: ${proceso.describirEstado()}`);

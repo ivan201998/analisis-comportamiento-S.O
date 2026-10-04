@@ -1,8 +1,9 @@
 import { IMetricas } from './IMetricas';
 import { Proceso } from './Proceso';
 
-// Contrato publico del simulador. SimuladorSO lo implementa. ReporteSimulacion depende
-// de esta interfaz, no de la clase concreta SimuladorSO (Dependency Inversion).
+// Contrato público del simulador. SimuladorSO lo implementa. Quien quiera mostrar o consultar el
+// estado (un reporte, una demo) debería depender de esta interfaz y no de la clase concreta
+// ([SOLID · D]).
 export interface ISimulador {
     
     agregarProceso(proceso: Proceso): void;

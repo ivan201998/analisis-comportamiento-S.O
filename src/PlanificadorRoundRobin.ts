@@ -2,25 +2,37 @@ import { IPlanificador } from './IPlanificador';
 import { Estado, Proceso } from './Proceso';
 import { IResultadoTick } from './IResultadoTick';
 
-// RF07: Round-Robin con una cola FIFO de Listos (que vive en ColasProcesos, no aca) y un
-// solo asiento (la CPU). RESPONSABILIDAD UNICA: esta clase solo sabe de la CPU y el
-// quantum; no toca la memoria ni las colas directamente, para eso devuelve un IResultadoTick.
+// Teoría (Temas 5 a 8): Round-Robin es un algoritmo apropiativo con turnos. Los procesos listos
+// forman una cola FIFO y cada uno usa la CPU como máximo un QUANTUM seguido; si no terminó,
+// vuelve al final de la cola. Hay una sola CPU, o sea un solo «asiento».
+//
+// PRINCIPIOS QUE APLICA
+// [SOLID · S] solo sabe de la CPU y el quantum. La cola de listos vive en ColasProcesos y la
+//     memoria en AdministradorMemoria: por eso este planificador DEVUELVE un IResultadoTick y deja
+//     que SimuladorSO reaccione, en vez de tocar esas cosas.
+// [SOLID · O] otro algoritmo (por ejemplo FCFS) sería otra clase que cumpla IPlanificador, sin
+//     tocar SimuladorSO.
+// [SOLID · D] SimuladorSO depende del contrato IPlanificador, no de esta clase.
+// [POO · Encapsulamiento] quién está en la CPU (enCpu) es privado.
+
 export class PlanificadorRoundRobin implements IPlanificador {
 
-    // ENCAPSULAMIENTO: enCpu es privado. Hacia afuera solo se conoce su pid (procesoEnCpu()),
-    // nunca el objeto Proceso completo, para no exponer estado interno mutable.
+    // [POO · Encapsulamiento] enCpu es privado. Hacia afuera se expone el PID (procesoEnCpu()) para
+    // consultas; procesoActivo() devuelve el objeto, solo para uso interno de SimuladorSO.
     private enCpu: Proceso | undefined = undefined;
 
+    // El quantum se fija al crear el planificador (RF01: SimuladorSO ya lo validó).
     constructor(private quantum: number) {
 
     }
 
+    // ¿Hay alguien en la CPU?
     estaLibre(): boolean {
 
         return this.enCpu === undefined;
 
     }
-
+    // Dispatcher (Tema 5): entrega la CPU al proceso elegido y lo pasa a EJECUTANDO.
     tomarControl(proceso: Proceso): void {
 
         this.enCpu = proceso;
@@ -28,31 +40,31 @@ export class PlanificadorRoundRobin implements IPlanificador {
 
     }
 
-    // RF10: solo el pid, nunca el objeto Proceso (vista de solo lectura).
+    // RF10: solo el PID, para consultas de solo lectura (no se expone el objeto).
     procesoEnCpu(): string | undefined {
 
         return this.enCpu?.pid;
 
     }
 
-    // Para uso interno de SimuladorSO (por ejemplo, para el bloqueo manual por E/S):
-    // "mirar" quien esta en CPU sin sacarlo todavia.
+    // Para uso interno de SimuladorSO (por ejemplo, el bloqueo por E/S): «mirar» quién está en la CPU
+    // sin sacarlo todavía.
     procesoActivo(): Proceso | undefined {
 
         return this.enCpu;
 
     }
 
+    // La CPU queda libre (por ejemplo, cuando el proceso se bloquea por E/S).
     liberarCpu(): void {
 
         this.enCpu = undefined;
 
     }
 
-    // RF07: descuenta 1 tick. La finalizacion tiene prioridad sobre el vencimiento del
-    // quantum. hayOtrosListos decide si el proceso rota (vuelve a la cola) o renueva su
-    // quantum y sigue (RF07: "si no hay otros Listos, renovar y continuar sin cambio de
-    // contexto").
+    // Un tick de CPU: descuenta 1 tick y responde, EN ESTE ORDEN: ¿terminó? ¿venció el quantum?
+    // La finalización tiene prioridad sobre el quantum. Si venció y hay otros listos, ROTA (y cuenta
+    // un cambio de contexto); si no hay nadie más, RENUEVA el quantum y sigue (RF07).
     ejecutarCpu(hayOtrosListos: boolean): IResultadoTick {
 
         const proceso = this.enCpu;
