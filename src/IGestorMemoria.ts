@@ -1,10 +1,9 @@
 import { IMetricas } from './IMetricas';
 import { Proceso } from './Proceso';
 
-// ABSTRACCION + DEPENDENCY INVERSION (la "D" de SOLID): SimuladorSO depende de este
-// contrato, no de la clase concreta AdministradorMemoria. Hoy solo hay una implementacion,
-// pero SimuladorSO no lo sabe ni le importa: solo necesita poder asignar, liberar y
-// consultar memoria.
+// [POO · Abstracción] + [SOLID · D]: SimuladorSO depende de este contrato, no de la clase concreta
+// AdministradorMemoria. Solo necesita poder asignar, liberar y consultar la memoria.
+// [SOLID · I] cuatro métodos, todos sobre memoria.
 export interface IGestorMemoria {
     asignar(proceso: Proceso): boolean;
     liberar(pid: string): void;

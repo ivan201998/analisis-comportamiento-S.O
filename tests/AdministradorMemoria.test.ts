@@ -225,4 +225,4 @@ describe("Configuración de la memoria (RF01)", () => {
         expect(() => new AdministradorMemoria(-100)).toThrow();
         expect(() => new AdministradorMemoria(10.5)).toThrow();
     });
-}
+})
