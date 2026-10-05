@@ -17,8 +17,8 @@ import { IResultadoTick } from './IResultadoTick';
 
 export class PlanificadorRoundRobin implements IPlanificador {
 
-    // [POO · Encapsulamiento] enCpu es privado. Hacia afuera se expone el PID (procesoEnCpu()) para
-    // consultas; procesoActivo() devuelve el objeto, solo para uso interno de SimuladorSO.
+    // [POO · Encapsulamiento] enCpu es privado. Hacia afuera se expone solo el PID (procesoEnCpu()),
+    // nunca el objeto.
     private enCpu: Proceso | undefined = undefined;
 
     // El quantum se fija al crear el planificador (RF01: SimuladorSO ya lo validó).
@@ -47,14 +47,6 @@ export class PlanificadorRoundRobin implements IPlanificador {
 
     }
 
-    // Para uso interno de SimuladorSO (por ejemplo, el bloqueo por E/S): «mirar» quién está en la CPU
-    // sin sacarlo todavía.
-    procesoActivo(): Proceso | undefined {
-
-        return this.enCpu;
-
-    }
-
     // La CPU queda libre (por ejemplo, cuando el proceso se bloquea por E/S).
     liberarCpu(): void {
 
@@ -62,7 +54,7 @@ export class PlanificadorRoundRobin implements IPlanificador {
 
     }
 
-    // Un tick de CPU: descuenta 1 tick y responde, EN ESTE ORDEN: ¿terminó? ¿venció el quantum?
+    // Un tick de CPU: descuenta 1 tick y responde, EN ESTE ORDEN: ¿terminó? ¿pidió E/S (RF08)? ¿venció el quantum?
     // La finalización tiene prioridad sobre el quantum. Si venció y hay otros listos, ROTA (y cuenta
     // un cambio de contexto); si no hay nadie más, RENUEVA el quantum y sigue (RF07).
     ejecutarCpu(hayOtrosListos: boolean): IResultadoTick {
@@ -73,25 +65,27 @@ export class PlanificadorRoundRobin implements IPlanificador {
         ocupado && proceso.ejecutarTick();
 
         const termino = ocupado && proceso.estaTerminado();
-        const vencioQuantum = ocupado && !termino && proceso.agotoQuantum(this.quantum);
+        const pideES = ocupado && !termino && proceso.debeBloquearse();
+        const vencioQuantum = ocupado && !termino && !pideES && proceso.agotoQuantum(this.quantum);
         const rota = vencioQuantum && hayOtrosListos;
         const renueva = vencioQuantum && !hayOtrosListos;
 
         termino && this.finalizar();
+        pideES && this.liberarCpu();
         rota && this.expulsarPorQuantum();
         renueva && proceso.reiniciarQuantum();
 
         return {
             ocupado,
             terminado: termino ? proceso : undefined,
-            rotado: rota ? proceso : undefined
+            rotado: rota ? proceso : undefined,
+            bloqueado: pideES ? proceso : undefined
         };
 
     }
 
     private finalizar(): void {
 
-        this.enCpu?.cambiarEstado(Estado.TERMINADO);
         this.enCpu = undefined;
 
     }

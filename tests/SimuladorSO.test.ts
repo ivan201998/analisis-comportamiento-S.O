@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { SimuladorSO } from '../src/SimuladorSO';
 import { Proceso } from '../src/Proceso';
 import { ProcesoConES } from '../src/ProcesoConES';
+import { EventoES } from '../src/EventoES';
 
 // Lote de la consigna: PID, KB, ticks de CPU. First-Fit, quantum 2.
 function simuladorDeLaConsigna(): SimuladorSO {
@@ -226,12 +227,9 @@ describe("Estados de los procesos durante la simulación (Tema 2)", () => {
     // Recorrido con E/S: EJECUTANDO -> BLOQUEADO -> (termina la E/S, pasa por LISTO) -> EJECUTANDO.
     it("estados: un proceso con E/S pasa por EJECUTANDO, BLOQUEADO y vuelve a EJECUTANDO", ()=>{
         const simulador = new SimuladorSO(2);
-        simulador.agregarProceso(new ProcesoConES("A", 100, 5));
+        simulador.agregarProceso(new ProcesoConES("A", 100, 5, new EventoES(1, 2)));
 
-        avanzar(simulador, 1);
-        expect(simulador.estados()).toEqual(["A: EJECUTANDO"]);
-
-        simulador.bloquearProcesoActual(2);
+        avanzar(simulador, 1);   // tick 1: ejecuta 1 tick de CPU y su evento lo manda a E/S
         expect(simulador.estados()).toEqual(["A: BLOQUEADO"]);
 
         avanzar(simulador, 1);   // tick 2: sigue bloqueado
@@ -244,17 +242,17 @@ describe("Estados de los procesos durante la simulación (Tema 2)", () => {
 
 // ---------------------------------------------------------------------------
 // Teoría: un proceso bloqueado no compite por la CPU; al terminar la E/S vuelve a LISTO.
-// Polimorfismo: solo ProcesoConES admite E/S; el simulador no pregunta el tipo, llama a admiteES().
+// RF08: el ProcesoConES trae un evento («después de N ticks de CPU, E/S de D ticks»). Polimorfismo: el
+// simulador no pregunta el tipo, llama a debeBloquearse() y duracionES(); un Proceso común responde que no.
 // ---------------------------------------------------------------------------
 describe("Entrada/salida y bloqueo (Tema 2)", () => {
     // A se bloquea 2 ticks (cuenta 1 cambio de contexto). Mientras espera, la CPU queda ociosa
     // (uso 50 %); al tercer tick vuelve a la CPU (uso 66,67 %).
     it("un proceso con E/S bloqueado vuelve a listos cuando termina su espera", ()=>{
         const simulador = new SimuladorSO(2);
-        simulador.agregarProceso(new ProcesoConES("A", 100, 5));
+        simulador.agregarProceso(new ProcesoConES("A", 100, 5, new EventoES(1, 2)));
 
-        avanzar(simulador, 1);
-        simulador.bloquearProcesoActual(2);
+        avanzar(simulador, 1);   // tick 1: el evento bloquea a A
         expect(simulador.cambiosDeContexto()).toBe(1);
 
         avanzar(simulador, 1);   // tick 2: bloqueado (queda 1)
@@ -264,14 +262,14 @@ describe("Entrada/salida y bloqueo (Tema 2)", () => {
         expect(simulador.usoCpu()).toBeCloseTo(66.67, 1);
     })
 
-    // Un Proceso común no admite E/S: el pedido se ignora y no cuenta cambio de contexto.
-    it("un proceso sin E/S ignora el pedido de bloqueo", ()=>{
+    // Un Proceso común no tiene evento de E/S: nunca se bloquea y no cuenta cambio de contexto.
+    it("un proceso sin E/S nunca se bloquea", ()=>{
         const simulador = new SimuladorSO(2);
         simulador.agregarProceso(new Proceso("A", 100, 5));
+
         avanzar(simulador, 1);
 
-        simulador.bloquearProcesoActual(2);
-
+        expect(simulador.estados()).toEqual(["A: EJECUTANDO"]);
         expect(simulador.cambiosDeContexto()).toBe(0);
     })
 })

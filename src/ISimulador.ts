@@ -7,7 +7,6 @@ import { Proceso } from './Proceso';
 export interface ISimulador {
     
     agregarProceso(proceso: Proceso): void;
-    bloquearProcesoActual(ticks?: number): void;
     avanzarTick(): void;
     usoCpu(): number;
     cambiosDeContexto(): number;

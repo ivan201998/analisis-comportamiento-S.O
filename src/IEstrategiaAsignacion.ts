@@ -6,5 +6,5 @@ import { Proceso } from './Proceso';
 // [POO · Polimorfismo] FirstFit la implementa hoy; Best-Fit o Worst-Fit podrían sumarse sin tocar
 //     AdministradorMemoria ([SOLID · O]).
 export interface IEstrategiaAsignacion {
-    elegirBloque(bloques: BloqueMemoria[], proceso: Proceso): BloqueMemoria | undefined;
+    elegirBloque(bloques: readonly BloqueMemoria[], proceso: Proceso): BloqueMemoria | undefined;
 }

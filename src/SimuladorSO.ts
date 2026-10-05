@@ -87,23 +87,12 @@ export class SimuladorSO implements ISimulador {
 
     }
     
-    // RF08: fuerza el paso del proceso que está en la CPU a BLOQUEADO (Tema 2), pero solo si admite
-    // E/S. [POO · Polimorfismo]: pregunta admiteES() sin saber qué clase es.
-    bloquearProcesoActual(ticks: number = 2): void {
-
-        const proceso = this.planificador.procesoActivo();
-        const bloqueable = proceso !== undefined && proceso.admiteES();
-
-        bloqueable ? this.ejecutarBloqueo(proceso as Proceso, ticks) : undefined;
-
-    }
-
-    // EJECUTANDO -> BLOQUEADO: libera la CPU, empieza la espera y cuenta un cambio de contexto.
-    // El proceso bloqueado CONSERVA su memoria: solo se libera cuando termina.
-    private ejecutarBloqueo(proceso: Proceso, ticks: number): void {
-        this.planificador.liberarCpu();
+    // RF08: el planificador detectó que el proceso cumplió los N ticks de su evento; acá se lo manda a
+    // BLOQUEADOS: empieza la espera y cuenta un cambio de contexto. El proceso bloqueado CONSERVA su
+    // memoria: solo se libera cuando termina. [POO · Polimorfismo]: no pregunta de qué clase es.
+    private bloquearPorES(proceso: Proceso): void {
         proceso.reiniciarQuantum();
-        proceso.bloquear(ticks);
+        proceso.bloquear(proceso.duracionES());
         this.colas.bloquear(proceso);
         this.estadisticas.registrarCambioDeContexto();
     }
@@ -138,6 +127,7 @@ export class SimuladorSO implements ISimulador {
 
         resultado.terminado && this.finalizarProceso(resultado.terminado);
         resultado.rotado && this.rotarProceso(resultado.rotado);
+        resultado.bloqueado && this.bloquearPorES(resultado.bloqueado);
 
     }
 

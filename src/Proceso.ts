@@ -38,7 +38,6 @@ export class Proceso implements ComportamientoProceso {
     private quantumConsumido: number;
     private estado: Estado;
 
-    // NUEVO: tabla de transiciones permitidas (va después del enum, que ya está arriba)
     // [POO · Doble encapsulamiento] el proceso protege sus propias transiciones: la tabla dice,
     // para cada estado, a cuáles puede pasar. TERMINADO es final (no sale a ninguno).
     private static readonly TRANSICIONES: Record<Estado, Estado[]> = {
@@ -107,9 +106,19 @@ export class Proceso implements ComportamientoProceso {
         this.setQuantumConsumido(this.getQuantumConsumido() + 1);
 
     }
-    // Tema 2: pasa el proceso a otro estado (por ejemplo NUEVO -> LISTO).
+    // Tema 2: pasa el proceso a otro estado, pero solo si la transición existe en la tabla.
     cambiarEstado(nuevo: Estado): void{
+        const permitido = Proceso.TRANSICIONES[this.getEstado()].includes(nuevo);
+
+        permitido || Proceso.error(`Transicion invalida: ${this.getEstado()} -> ${nuevo}`);
+
         this.setEstado(nuevo);
+    }
+
+    // Lanza el error desde dentro de una expresión (el proyecto evita `if`).
+    // Es protected porque ProcesoConES la reutiliza (RF08).
+    protected static error(mensaje: string): never {
+        throw new Error(mensaje);
     }
     //
     estaEn(estado: Estado): boolean {
@@ -161,12 +170,24 @@ export class Proceso implements ComportamientoProceso {
         this.setQuantumConsumido(0);
 
     }
-    // [POO · Polimorfismo] estos 4 métodos son el comportamiento por defecto: un proceso común NO hace E/S.
+    // [POO · Polimorfismo] estos 6 métodos son el comportamiento por defecto: un proceso común NO hace E/S.
     // ProcesoConES los sobrescribe con `override`. Quien los llama (SimuladorSO, ColasProcesos) nunca
     // pregunta de qué tipo es el proceso: llama al método y cada clase responde a su manera.
     admiteES(): boolean {
 
         return false;
+
+    }
+    // RF08: ¿le toca pedir E/S en este tick? Un proceso común nunca la pide.
+    debeBloquearse(): boolean {
+
+        return false;
+
+    }
+    // RF08: cuántos ticks dura su E/S. Un proceso común no tiene.
+    duracionES(): number {
+
+        return 0;
 
     }
     //

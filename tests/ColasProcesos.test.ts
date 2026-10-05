@@ -2,6 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { ColasProcesos } from '../src/ColasProcesos';
 import { Estado, Proceso } from '../src/Proceso';
 import { ProcesoConES } from '../src/ProcesoConES';
+import { EventoES } from '../src/EventoES';
+
+// Proceso valida sus transiciones: para llegar a EJECUTANDO hay que pasar por LISTO.
+function aEjecutando<T extends Proceso>(proceso: T): T {
+    proceso.cambiarEstado(Estado.ESPERANDO_MEMORIA);
+    proceso.cambiarEstado(Estado.LISTO);
+    proceso.cambiarEstado(Estado.EJECUTANDO);
+    return proceso;
+}
 
 // ColasProcesos = las «salas de espera» por las que pasa un proceso (Temas 2 y 5).
 // Teoría: el estado de un proceso cambia al moverse entre colas. Esta clase solo mueve procesos
@@ -60,8 +69,8 @@ describe("Cola de listos FIFO (Round-Robin, Tema 7)", () => {
     // Se atiende primero al que lleva más tiempo esperando.
     it("tomarListo saca al primero en orden FIFO", () => {
         const colas = new ColasProcesos();
-        colas.reencolar(new Proceso("P1", 100, 1));
-        colas.reencolar(new Proceso("P2", 100, 1));
+        colas.reencolar(aEjecutando(new Proceso("P1", 100, 1)));
+        colas.reencolar(aEjecutando(new Proceso("P2", 100, 1)));
 
         expect(colas.tomarListo()?.pid).toBe("P1");
         expect(colas.pidsListos()).toEqual(["P2"]);
@@ -70,7 +79,7 @@ describe("Cola de listos FIFO (Round-Robin, Tema 7)", () => {
     // Un proceso que agotó su quantum vuelve al FINAL de la cola y queda LISTO.
     it("reencolar deja al proceso LISTO al final de la fila",()=>{
         const colas = new ColasProcesos();
-        const p = new Proceso("P1", 100, 1);
+        const p = aEjecutando(new Proceso("P1", 100, 1));
 
         colas.reencolar(p);
 
@@ -84,7 +93,7 @@ describe("Cola de listos FIFO (Round-Robin, Tema 7)", () => {
         const colas = new ColasProcesos();
         expect(colas.hayListos()).toBe(false);
 
-        colas.reencolar(new Proceso("P1", 100, 1));
+        colas.reencolar(aEjecutando(new Proceso("P1", 100, 1)));
 
         expect(colas.hayListos()).toBe(true);
     })
@@ -98,7 +107,7 @@ describe("Bloqueados y entrada/salida (Tema 2)", () => {
     it("bloquear deja al proceso BLOQUEADO",()=>{
 
         const colas = new ColasProcesos();
-        const p = new Proceso("P1", 100, 1);
+        const p = aEjecutando(new Proceso("P1", 100, 1));
 
         colas.bloquear(p);
 
@@ -109,7 +118,7 @@ describe("Bloqueados y entrada/salida (Tema 2)", () => {
     it("avanzarBloqueados pasa a listos a los que ya cumplieron su E/S",()=>{
 
         const colas = new ColasProcesos();
-        const p = new ProcesoConES("P1", 100, 5);
+        const p = aEjecutando(new ProcesoConES("P1", 100, 5, new EventoES(1, 2)));
         p.bloquear(1);
         colas.bloquear(p);
 
@@ -122,7 +131,7 @@ describe("Bloqueados y entrada/salida (Tema 2)", () => {
     // Si todavía le falta tiempo de E/S, sigue bloqueado y no pasa a listos.
     it("avanzarBloqueados deja esperando al que todavia no cumplio su E/S",()=>{
         const colas = new ColasProcesos();
-        const p = new ProcesoConES("P1", 100, 5);
+        const p = aEjecutando(new ProcesoConES("P1", 100, 5, new EventoES(1, 2)));
         p.bloquear(2);
         colas.bloquear(p);
 
@@ -140,7 +149,7 @@ describe("Fin del ciclo de vida", () => {
     // Pasa a TERMINADO y queda en la lista, en el orden en que fueron terminando.
     it("terminar mueve al proceso a terminados y lo deja en TERMINADO",()=>{
         const colas = new ColasProcesos();
-        const p = new Proceso("P1", 100, 1);
+        const p = aEjecutando(new Proceso("P1", 100, 1));
 
         colas.terminar(p);
 
