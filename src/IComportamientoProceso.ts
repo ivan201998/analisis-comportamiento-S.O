@@ -22,6 +22,8 @@ export interface ComportamientoProceso{
     agotoQuantum(limite: number): boolean;
     reiniciarQuantum():void;
     admiteES(): boolean;
+    debeBloquearse(): boolean;
+    duracionES(): number;
     bloquear(ticks: number): void;
     avanzarBloqueo(): void;
     estaBloqueado(): boolean;

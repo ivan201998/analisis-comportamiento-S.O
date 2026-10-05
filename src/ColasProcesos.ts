@@ -19,10 +19,10 @@ export class ColasProcesos implements IColas {
     private bloqueados: Proceso[] = [];
     private terminados: Proceso[] = [];
 
-    // Todo proceso entra al sistema en estado NUEVO (Tema 2).
+    // Todo proceso entra al sistema en estado NUEVO (Tema 2). El constructor de Proceso ya lo deja
+    // en NUEVO, por eso acá no hace falta cambiar el estado.
     agregarNuevo(proceso: Proceso): void{
 
-        proceso.cambiarEstado(Estado.NUEVO);
         this.nuevos.push(proceso);
     }
 

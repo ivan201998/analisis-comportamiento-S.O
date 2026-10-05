@@ -38,6 +38,18 @@ export class Proceso implements ComportamientoProceso {
     private quantumConsumido: number;
     private estado: Estado;
 
+    // NUEVO: tabla de transiciones permitidas (va después del enum, que ya está arriba)
+    // [POO · Doble encapsulamiento] el proceso protege sus propias transiciones: la tabla dice,
+    // para cada estado, a cuáles puede pasar. TERMINADO es final (no sale a ninguno).
+    private static readonly TRANSICIONES: Record<Estado, Estado[]> = {
+        [Estado.NUEVO]: [Estado.ESPERANDO_MEMORIA],
+        [Estado.ESPERANDO_MEMORIA]: [Estado.LISTO],
+        [Estado.LISTO]: [Estado.EJECUTANDO],
+        [Estado.EJECUTANDO]: [Estado.LISTO, Estado.BLOQUEADO, Estado.TERMINADO],
+        [Estado.BLOQUEADO]: [Estado.LISTO],
+        [Estado.TERMINADO]: [],
+    };
+
     // pid y tamanoMemoria son la identidad del proceso (PID y memoria que pide): no deben cambiar
     // después de creado. `readonly` lo garantiza. [POO · Encapsulamiento por inmutabilidad]: se leen
     // directo pero no se pueden reescribir. (No es «doble encapsulamiento»: para eso tendrían que ser

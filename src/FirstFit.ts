@@ -12,7 +12,8 @@ import { Proceso } from './Proceso';
 export class FirstFit implements IEstrategiaAsignacion {
 
     // `find` devuelve el primer bloque libre en el que entra el proceso, o undefined si ninguno alcanza.
-    elegirBloque(bloques: BloqueMemoria[], proceso: Proceso): BloqueMemoria | undefined {
+    // [POO · Encapsulamiento] `readonly`: la estrategia puede MIRAR la lista de bloques pero no modificarla.
+    elegirBloque(bloques: readonly BloqueMemoria[], proceso: Proceso): BloqueMemoria | undefined {
 
         return bloques.find(bloque => bloque.entra(proceso));
 
