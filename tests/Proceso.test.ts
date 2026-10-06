@@ -52,6 +52,8 @@ describe("Estados de un proceso", () => {
             return proceso.describirEstado();
         })];
 
+        // Verifica que el proceso pase por los estados esperados, en este orden.
+        // Después de bloquearse por E/S, vuelve a LISTO, se ejecuta y finalmente termina.
         expect(recorrido).toEqual([
             "NUEVO", "ESPERANDO_MEMORIA", "LISTO", "EJECUTANDO", "BLOQUEADO", "LISTO", "EJECUTANDO", "TERMINADO",
         ]);

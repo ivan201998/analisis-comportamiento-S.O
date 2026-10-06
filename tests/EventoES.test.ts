@@ -20,4 +20,8 @@ describe("EventoES (RF08)", () => {
     ])("rechaza %s invalido (%s, %s)", (campo, ticks, duracion) => {
         expect(() => new EventoES(ticks, duracion)).toThrow(`${campo} debe ser un entero positivo`);
     });
+    // it.each ejecuta la misma prueba con cada fila de datos.
+    // Cada fila indica: [campo inválido, ticks, duración].
+    // Probamos ceros, negativos y decimales porque ambos valores deben ser enteros positivos.
+    // Verificamos que el constructor lance un error con el mensaje del campo correspondiente.
 })
